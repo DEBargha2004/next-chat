@@ -14,6 +14,8 @@ export function GlobalAppStateProvider ({ children }) {
 
   const [friends, setFriends] = useState([])
   const [presenceInfo, setPresenceInfo] = useState([])
+  const [conversationsInfo, setConversationsInfo] = useState([])
+  const [messages, setMessages] = useState([])
   return (
     <Appstate.Provider
       value={{
@@ -22,7 +24,11 @@ export function GlobalAppStateProvider ({ children }) {
         friends,
         setFriends,
         presenceInfo,
-        setPresenceInfo
+        setPresenceInfo,
+        conversationsInfo,
+        setConversationsInfo,
+        setMessages,
+        messages
       }}
     >
       {children}

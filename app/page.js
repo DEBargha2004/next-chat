@@ -16,7 +16,9 @@ import {
   query,
   where,
   onSnapshot,
-  updateDoc
+  updateDoc,
+  or,
+  orderBy
 } from 'firebase/firestore'
 
 import {
@@ -29,11 +31,12 @@ import {
   goOffline,
   goOnline
 } from 'firebase/database'
-import { format } from 'date-fns'
 
 export default function Home () {
   const { isSignedIn, user, isLoaded } = useUser()
-  const { setFriends, setPresenceInfo } = useContext(Appstate)
+  const { setFriends, setPresenceInfo, setMessages, setConversationsInfo } =
+    useContext(Appstate)
+
   const [userid, setUserid] = useState(null)
   const [connection, setConnection] = useState(false)
 
@@ -104,8 +107,43 @@ export default function Home () {
       setPresenceInfo(presence)
     })
 
+    const cquery = query(
+      collection(firestoreDB, `conversations`),
+      or(where('u1_id', '==', user.id), where('u2_id', '==', user.id))
+    )
+
+    const setUpSubCollectionListener = (conversation_id, u1_id, u2_id) => {
+      const mquery = query(
+        collection(firestoreDB, `conversations/${conversation_id}/messages`),orderBy('message_createdAt')
+      )
+      onSnapshot(mquery, snapshots => {
+        const messages = []
+        snapshots.forEach(snapshot => {
+          messages.push(snapshot.data())
+        })
+        const friend_id = u1_id === user.id ? u2_id : u1_id
+        setMessages(prev => {
+          return {
+            ...prev,
+            [friend_id]: messages
+          }
+        })
+      })
+    }
+
+    const unSubMessages = onSnapshot(cquery, snapshots => {
+      const messages_from_firebase = []
+      snapshots.forEach(snapshot => {
+        messages_from_firebase.push(snapshot.data())
+        const { conversation_id, u1_id, u2_id } = snapshot.data()
+        setUpSubCollectionListener(conversation_id, u1_id, u2_id)
+      })
+      setConversationsInfo(messages_from_firebase)
+    })
+
     return () => {
       unsub()
+      unSubMessages()
     }
   }, [isLoaded])
 

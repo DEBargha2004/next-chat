@@ -1,15 +1,18 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useContext } from 'react'
+import { Appstate } from '@/hooks/context'
 import ChatMessage from './ChatMessage'
 
 function MessagesList ({ list }) {
   const messagesListRef = useRef(null)
+  const { messages,selectedChatUser } = useContext(Appstate)
 
-  useEffect(()=>{
+  useEffect(() => {
     messagesListRef.current.scrollTo({
-      behavior : 'smooth',
-      top : messagesListRef.current.scrollHeight
+      behavior: 'smooth',
+      top: messagesListRef.current.scrollHeight
     })
-  },[list])
+  }, [messages])
+  console.log(selectedChatUser);
   return (
     <div
       className='overflow-y-scroll'
@@ -17,8 +20,8 @@ function MessagesList ({ list }) {
       ref={messagesListRef}
       id='messageList'
     >
-      {list.map((message, index) => {
-        return <ChatMessage type={message.type} message={message} url={list.url} />
+      {messages[selectedChatUser.current_User_Id]?.map((message, index) => {
+        return <ChatMessage message={message} key={index} />
       })}
     </div>
   )
