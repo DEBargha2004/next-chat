@@ -8,11 +8,11 @@ function MessagesList ({ list }) {
 
   useEffect(() => {
     messagesListRef.current.scrollTo({
-      behavior: 'smooth',
+      behavior: 'auto',
       top: messagesListRef.current.scrollHeight
     })
-  }, [messages])
-  console.log(selectedChatUser);
+  }, [messages,selectedChatUser])
+
   return (
     <div
       className='overflow-y-scroll'

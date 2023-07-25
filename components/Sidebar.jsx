@@ -4,8 +4,8 @@ import FriendList from './FriendList'
 
 function Sidebar ({ className }) {
   return (
-    <div className={`${className} pl-4`}>
-      <div className='my-3'>
+    <div className={`${className}`}>
+      <div className='my-3 pl-4'>
         <UserButton />
       </div>
       <div>

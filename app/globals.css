@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +11,6 @@ body,
   width: 100%;
 }
 
-#messageList::-webkit-scrollbar{
+#messageList::-webkit-scrollbar {
   display: none;
 }
