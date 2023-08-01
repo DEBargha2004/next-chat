@@ -1,6 +1,9 @@
 import { format, isSameDay, isSameHour, isSameMinute } from 'date-fns'
 
 export const generateTimeStamp = date => {
+  if (!date) {
+    return
+  }
   const currentDate = new Date()
   const inputDate = new Date(date)
   if (isSameDay(currentDate, inputDate)) {

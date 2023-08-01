@@ -1,6 +1,8 @@
 'use client'
 
-import { createContext, useState } from 'react'
+import { useUser } from '@clerk/nextjs'
+import { cloneDeep } from 'lodash'
+import { createContext, useEffect, useMemo, useState } from 'react'
 
 export const Appstate = createContext()
 
@@ -9,13 +11,18 @@ export function GlobalAppStateProvider ({ children }) {
     current_User_Name: '',
     current_User_Image: '',
     last_Seen: '',
-    online: false
+    online: false,
+    current_User_Id: null
   })
 
   const [friends, setFriends] = useState([])
+  const [searchedFriend, setSearchedFriend] = useState([])
   const [presenceInfo, setPresenceInfo] = useState([])
   const [conversationsInfo, setConversationsInfo] = useState([])
   const [messages, setMessages] = useState([])
+  const [selectedService, setSelectedService] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
   return (
     <Appstate.Provider
       value={{
@@ -28,7 +35,13 @@ export function GlobalAppStateProvider ({ children }) {
         conversationsInfo,
         setConversationsInfo,
         setMessages,
-        messages
+        messages,
+        setSelectedService,
+        selectedService,
+        setSearchedFriend,
+        searchedFriend,
+        searchQuery,
+        setSearchQuery
       }}
     >
       {children}

@@ -15,7 +15,7 @@ function ChatMessage ({ message }) {
       const friend_info = friends.find(
         friend => friend.user_id === message.sender_id
       )
-      return friend_info.user_img
+      return friend_info?.user_img
     }
   }, [selectedChatUser])
 

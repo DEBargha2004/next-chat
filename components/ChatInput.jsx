@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from 'react'
+import { useState, useContext, useRef, useEffect } from 'react'
 import { v4, v5 } from 'uuid'
 import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
@@ -16,6 +16,9 @@ import {
 } from 'firebase/firestore'
 import { motion } from 'framer-motion'
 import { ref, uploadBytes } from 'firebase/storage'
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
+import { cloneDeep } from 'lodash'
 
 function ChatInput () {
   const { user } = useUser()
@@ -23,8 +26,13 @@ function ChatInput () {
   const userInputRef = useRef(null)
   const [userInput, setUserInput] = useState('')
   const [imageInfo, setImageInfo] = useState({ url: null, info: null })
+  const [emojiButtonStatus, setEmojiButtonStatus] = useState({
+    clicked: false,
+    hover: false
+  })
+
   const handleFileChange = e => {
-    console.log(e.target.files[0]);
+    console.log(e.target.files[0])
     const fileReader = new FileReader()
     fileReader.onloadend = () => {
       setImageInfo({ url: fileReader.result, info: e.target.files[0] })
@@ -47,19 +55,34 @@ function ChatInput () {
     message
   }) => {
     const con_Ref = doc(firestoreDB, `conversations/${conversation_id}`)
-    console.log('in shareMessage')
+
     const docInfo = await getDoc(con_Ref)
     const message_collection_path = `conversations/${conversation_id}/messages`
-    console.log(message_collection_path)
+
+    const messageId = v4()
+
+    message = {
+      ...message,
+      messageId
+    }
+
+    // console.log(message_collection_path)
+
     if (docInfo.exists()) {
-      await addDoc(collection(firestoreDB, message_collection_path), message)
+      await setDoc(
+        doc(firestoreDB, message_collection_path, messageId),
+        message
+      )
     } else {
       await setDoc(
         doc(firestoreDB, `conversations/${conversation_id}`),
         conversation_info
       )
 
-      await addDoc(collection(firestoreDB, message_collection_path), message)
+      await setDoc(
+        doc(firestoreDB, message_collection_path, messageId),
+        message
+      )
     }
 
     setUserInput('')
@@ -67,15 +90,13 @@ function ChatInput () {
   }
 
   const handleMessageSubmit = async e => {
-    console.log('catched')
     const imageName = v4()
     e.preventDefault()
 
     if (!(imageInfo.url || userInput)) {
-      console.log('returned')
       return
     }
-    console.log('not returned')
+
     const sender_id = user.id
     const receiver_id = selectedChatUser.current_User_Id
     const message_data = {
@@ -89,6 +110,9 @@ function ChatInput () {
     }
     const message_createdAt = serverTimestamp()
     const message_read = false
+    const message_readAt = null
+    const message_deliver = false
+    const message_deliveredAt = null
 
     const conversation_info = {
       conversation_id,
@@ -104,24 +128,25 @@ function ChatInput () {
       message_data,
       message_createdAt,
       message_read,
-      message_readAt: null
+      message_readAt,
+      message_deliver,
+      message_deliveredAt
     }
-    console.log('crossed')
+
     const contentRef = ref(contentDB, imageName)
-    console.log('contentref crossed')
+
     imageInfo.info && (await uploadBytes(contentRef, imageInfo.info))
-    console.log('upload crossed')
     ;(userInput || imageInfo.info) &&
       (await shareMessage({ conversation_id, conversation_info, message }))
-    console.log('crossed share message')
   }
 
   const abortImage = () => {
     setImageInfo({ info: null, url: null })
   }
 
+
   return (
-    <div className='min-h-[64px] flex items-center justify-between px-10 relative'>
+    <div className='min-h-[64px] flex items-center justify-between px-5 relative'>
       {imageInfo?.url ? (
         <div className='absolute h-[250px] bottom-[64px]'>
           <motion.img
@@ -152,14 +177,53 @@ function ChatInput () {
           name=''
           id='imageInput'
           onChange={handleFileChange}
+          accept='image/*'
         />
         <label htmlFor='imageInput'>
+          <div className='p-1 hover:bg-slate-200 transition-all rounded-md'>
+            <img
+              src='https://cdn-icons-png.flaticon.com/512/10054/10054290.png'
+              className='h-8 cursor-pointer'
+              alt=''
+            />
+          </div>
+        </label>
+        <div
+          className={`p-1 hover:bg-slate-200 ${
+            emojiButtonStatus.clicked ? `bg-slate-200` : ``
+          } transition-all rounded-md relative`}
+          onMouseEnter={() =>
+            setEmojiButtonStatus(prev => ({ ...prev, hover: true }))
+          }
+          onMouseLeave={() =>
+            setEmojiButtonStatus(prev => ({
+              ...prev,
+              hover: false
+            }))
+          }
+          onClick={() =>
+            setEmojiButtonStatus(prev => ({ ...prev, clicked: !prev.clicked }))
+          }
+        >
           <img
-            src='https://cdn-icons-png.flaticon.com/512/10054/10054290.png'
+            src='https://cdn-icons-png.flaticon.com/512/166/166538.png'
             className='h-8 cursor-pointer'
             alt=''
           />
-        </label>
+          {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
+            <div className='absolute bottom-8'>
+              <Picker
+                className=''
+                onEmojiSelect={e => {
+                  let { native } = e
+                  let userInputClone = cloneDeep(userInput)
+                  userInputClone += native
+                  setUserInput(userInputClone)
+                }}
+              />
+            </div>
+          ) : null}
+        </div>
         <input
           type='text'
           name=''
@@ -174,10 +238,10 @@ function ChatInput () {
           className='h-8 w-8 flex justify-center items-center'
         >
           <img
-          src='https://cdn-icons-png.flaticon.com/512/3682/3682321.png'
-          className={`h-full ${!(userInput || imageInfo) ? `grayscale` : ``}`}
-          alt=''
-        />
+            src='https://cdn-icons-png.flaticon.com/512/3682/3682321.png'
+            className={`h-full ${!(userInput || imageInfo) ? `grayscale` : ``}`}
+            alt=''
+          />
         </button>
       </form>
     </div>

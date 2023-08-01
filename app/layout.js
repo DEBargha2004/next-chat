@@ -1,7 +1,8 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider, auth } from '@clerk/nextjs'
 import { GlobalAppStateProvider } from '@/hooks/context'
+import AppWrapper from '@/components/AppWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -11,6 +12,7 @@ export const metadata = {
 }
 
 export default function RootLayout ({ children }) {
+  const { userId } = auth()
   return (
     <ClerkProvider>
       <html lang='en'>
@@ -22,7 +24,9 @@ export default function RootLayout ({ children }) {
           />
         </head>
         <body className={inter.className}>
-          <GlobalAppStateProvider>{children}</GlobalAppStateProvider>
+          <GlobalAppStateProvider>
+            {userId ? <AppWrapper>{children}</AppWrapper> : children}
+          </GlobalAppStateProvider>
         </body>
       </html>
     </ClerkProvider>

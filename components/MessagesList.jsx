@@ -1,22 +1,28 @@
-import React, { useEffect, useRef, useContext } from 'react'
+'use client'
+
+import React, { useEffect, useRef, useContext, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 import ChatMessage from './ChatMessage'
 
 function MessagesList ({ list }) {
   const messagesListRef = useRef(null)
-  const { messages,selectedChatUser } = useContext(Appstate)
+  const { messages, selectedChatUser } = useContext(Appstate)
 
   useEffect(() => {
     messagesListRef.current.scrollTo({
-      behavior: 'auto',
+      behavior: 'smooth',
       top: messagesListRef.current.scrollHeight
     })
-  }, [messages,selectedChatUser])
+  }, [messages, selectedChatUser])
+
+  // useEffect(() => {
+  //   messagesListRef.current.style.height = `${window.innerHeight - 128}px`
+  // }, [])
 
   return (
     <div
-      className='overflow-y-scroll'
-      style={{ height: `${window.innerHeight - 128}px` }}
+      className='overflow-y-scroll -z-10 h-[calc(100%-128px)]'
+      // style={{ height: `${0}px` }}
       ref={messagesListRef}
       id='messageList'
     >

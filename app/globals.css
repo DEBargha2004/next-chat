@@ -11,6 +11,3 @@ body,
   width: 100%;
 }
 
-#messageList::-webkit-scrollbar {
-  display: none;
-}
