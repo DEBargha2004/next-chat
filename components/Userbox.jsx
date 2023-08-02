@@ -19,20 +19,10 @@ function Userbox ({ item }) {
   //getting the online status
   const user_presense_info = useMemo(() => {
     return presenceInfo.find(
-      userPresence => userPresence.user_id === item.user_id
+      userPresence => userPresence?.user_id === item?.user_id
     )
   }, [presenceInfo])
 
-  // const showSeenStatus = useMemo(() => {
-  //   if (item.lastMessage.sender_id === user.id) {
-  //     return {
-  //       deliver: item.lastMessage.message_deliver,
-  //       read: item.lastMessage.message_read
-  //     }
-  //   } else {
-  //     return false
-  //   }
-  // }, [item.lastMessage])
 
   const unreadMessages = useMemo(() => {
     const message_info = messages[item.user_id]
@@ -47,6 +37,7 @@ function Userbox ({ item }) {
     const last_message_info = _.maxBy(messages_info, item =>
       _.get(item, 'message_createdAt.seconds')
     )
+    console.log(messages_info,last_message_info);
     return last_message_info
   }, [messages[item.user_id]])
 

@@ -9,7 +9,7 @@ function ChatBoxHeader () {
   const user_presence_info = useMemo(() => {
     const current_user = presenceInfo.find(
       user_presence_status =>
-        user_presence_status.user_id === selectedChatUser.current_User_Id
+        user_presence_status?.user_id === selectedChatUser.current_User_Id
     )
     return {
       last_Seen: generateTimeStamp(current_user?.last_seen || 0),

@@ -40,7 +40,7 @@ export default function messageStatus (message, color) {
 
 function SeenStatus (message) {
   const { user } = useUser()
-  if (message?.sender_id === user.id) {
+  if (message?.sender_id === user?.id) {
     return {
       deliver: message.message_deliver,
       read: message.message_read

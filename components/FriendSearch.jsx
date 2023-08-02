@@ -23,8 +23,6 @@ export default function FriendSearch () {
     searchList = await searchList.json()
 
     setSearchedFriend(searchList)
-
-    console.log(searchList)
   }
 
   useEffect(() => {

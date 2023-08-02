@@ -75,62 +75,67 @@ export default function AppWrapper ({ children }) {
     }
   }
 
-  function addUserWithConversations (u1, u2) {
-    console.log(u1,u2);
-    const {participant_id : friend_id} = [u1, u2].find(u => u.participant_id !== user.id)
-    // console.log('addUserWithConversations')
-    // console.log(u1_id, u2_id)
-    getDoc(doc(firestoreDB, `users/${friend_id}`))
-      .then(data => {
-        if (data.exists()) {
-          setFriends(prev => {
-            return [...prev, data.data()]
-          })
-        }
-      })
-      .catch(e => {
-        console.error(e)
-      })
+  async function addUserWithConversations (participants) {
+    let friend_id = participants.find(
+      participant_id => participant_id !== user.id
+    )
+
+    try {
+      const data = await getDoc(doc(firestoreDB, `users/${friend_id}`))
+      if (data.exists()) {
+        return data.data()
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   useEffect(() => {
-    setFriends([])
-    // setPresenceInfo([])
+    async function updateFriendsAndStatus () {
+      setFriends([])
 
-    // Create an array to store the references to the Firebase listeners
-    const listeners = []
+      const listeners = []
 
-    // Map through conversationsInfo and set up listeners for each friend
-    const localPresenceInfo = []
+      const localPresenceInfo = []
+      const friends_info = []
 
-    conversationsInfo.forEach(({ participants }) => {
-      console.log(participants)
-      addUserWithConversations(...participants)
-      const { participant_id : friend_id } = [...participants].find(id => id !== user.id)
+      for (const conversation_info of conversationsInfo) {
+        const participants = conversation_info.participants
 
-      console.log(participants)
+        const friend_info = await addUserWithConversations(participants)
+        friends_info.push(friend_info)
 
-      // Set up the listener and store its reference
-      const listener = onValue(ref(realtimeDB, `users/${friend_id}`), snap => {
-        const user_presenceInfo = localPresenceInfo.find(
-          info => info.user_id === friend_id
+        let friend_id = participants.find(id => id !== user.id)
+
+        // Set up the listener and store its reference
+        const listener = onValue(
+          ref(realtimeDB, `users/${friend_id}`),
+          snap => {
+            const user_presenceInfo = localPresenceInfo.find(
+              info => info.user_id === friend_id
+            )
+            if (!user_presenceInfo) {
+              localPresenceInfo.push(snap.val())
+            } else {
+              const index = _.findIndex(
+                localPresenceInfo,
+                obj => obj.user_id === friend_id
+              )
+
+              localPresenceInfo.splice(index, 1, snap.val())
+              // console.log(snap.val());
+            }
+            console.log(localPresenceInfo, 'before setting')
+            setPresenceInfo([...localPresenceInfo])
+          }
         )
-        if (!user_presenceInfo) {
-          localPresenceInfo.push(snap.val())
-        } else {
-          const index = _.findIndex(
-            localPresenceInfo,
-            obj => obj.user_id === friend_id
-          )
+        listeners.push(listener)
+      }
 
-          localPresenceInfo.splice(index, 1, snap.val())
-          // console.log(snap.val());
-        }
-        console.log(localPresenceInfo, 'before setting')
-        setPresenceInfo([...localPresenceInfo])
-      })
-      listeners.push(listener)
-    })
+      setFriends([...friends_info])
+    }
+
+    updateFriendsAndStatus()
   }, [conversationsInfo])
 
   useEffect(() => {
@@ -160,24 +165,7 @@ export default function AppWrapper ({ children }) {
       conversation_info,
       conversations_info
     ) => {
-      const participants = []
-
-      const participants_firebase = await getDocs(
-        query(
-          collection(
-            firestoreDB,
-            `conversations/${conversation_info.conversation_id}/participants`
-          )
-        )
-      )
-      participants_firebase.docs.forEach(doc => {
-        participants.push(doc.data())
-      })
-      const con_info = conversations_info.find(
-        con => con.conversation_id === conversation_info.conversation_id
-      )
-      con_info.participants = participants // setting participants to each conversation
-
+      console.log(conversation_info)
       const mquery = query(
         collection(
           firestoreDB,
@@ -214,9 +202,10 @@ export default function AppWrapper ({ children }) {
             messages.push(snapshot.data())
           })
         )
-        const {participant_id : friend_id} = participants.find(
-          participant => participant.participant_id !== user.id
+        let friend_id = conversation_info.participants.find(
+          participant_id => participant_id !== user.id
         )
+
         setMessages(prev => {
           return {
             ...prev,
@@ -229,7 +218,6 @@ export default function AppWrapper ({ children }) {
     }
 
     setFriends([])
-
     const unsub_subcollection_list = []
     setPresenceInfo([])
 
@@ -239,11 +227,12 @@ export default function AppWrapper ({ children }) {
 
     const unSubMessages = onSnapshot(cquery, async snapshots => {
       const conversations_info_list = []
-      console.log(snapshots.docs)
+      // console.log(snapshots.docs)
       for (const snapshot of snapshots.docs) {
-        conversations_info_list.push(snapshot.data())
         const conversation_info = snapshot.data()
+        conversations_info_list.push(conversation_info)
 
+        console.log(conversation_info)
         const unsub_subcollection = await setUpSubCollectionListener(
           conversation_info,
           conversations_info_list

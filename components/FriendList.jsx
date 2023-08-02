@@ -7,7 +7,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 
 function FriendList () {
-  const { friends, messages, setFriends, searchedFriend,searchQuery, setSearchQuery } = useContext(Appstate)
+  const { friends, messages, setFriends, searchedFriend,searchQuery } = useContext(Appstate)
 
   const generate_hybrid = ({ friendList, searchList }) => {
     const hybridArray = searchList.map(user => {
@@ -55,7 +55,6 @@ function FriendList () {
       return _.orderBy(hybridArray, 'user_name', 'asc')
     }
 
-    // console.log('2nd approach',friends);
     let friends_withNoCoversation = []
     let friends_withConversation = []
 
@@ -76,7 +75,6 @@ function FriendList () {
       'user_name',
       'asc'
     )
-    // console.log(friends_withConversation, friends_withNoCoversation, friends)
 
     return [...friends_withConversation, ...friends_withNoCoversation]
   }, [friends, messages, searchedFriend])

@@ -68,20 +68,6 @@ function ChatInput () {
       )
       const con_info = await getDoc(doc(firestoreDB, con()))
 
-      if (!users_sender_con.exists()) {
-        await setDoc(doc(firestoreDB, users_con(sender_id)), {
-          conversation_id,
-          createdAt,
-          type: 'one-one'
-        })
-      }
-      if (!users_receiver_con.exists()) {
-        await setDoc(doc(firestoreDB, users_con(receiver_id)), {
-          conversation_id,
-          createdAt,
-          type: 'one-one'
-        })
-      }
       if (!con_info.exists()) {
         await setDoc(doc(firestoreDB, con()), {
           conversation_id,
@@ -95,14 +81,27 @@ function ChatInput () {
           participant_id: receiver_id
         })
       }
+
+      if (!users_sender_con.exists()) {
+        await setDoc(doc(firestoreDB, users_con(sender_id)), {
+          conversation_id,
+          createdAt,
+          type: 'one-one',
+          participants: [sender_id, receiver_id]
+        })
+      }
+      if (!users_receiver_con.exists()) {
+        await setDoc(doc(firestoreDB, users_con(receiver_id)), {
+          conversation_id,
+          createdAt,
+          type: 'one-one',
+          participants: [sender_id, receiver_id]
+        })
+      }
     }
   }
 
-  const shareMessage = async ({
-    conversation_id,
-    message
-  }) => {
-
+  const shareMessage = async ({ conversation_id, message }) => {
     const message_collection_path = `conversations/${conversation_id}/messages`
 
     await addConInfoInUser({ conversation_id })
@@ -179,7 +178,6 @@ function ChatInput () {
         }))
       }
     }
-
 
     const emoji_icon = document.getElementById('emoji_icon')
     window.addEventListener('click', handleEmojisClose)
