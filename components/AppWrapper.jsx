@@ -17,7 +17,8 @@ import {
   onSnapshot,
   updateDoc,
   or,
-  orderBy
+  orderBy,
+  getDocs
 } from 'firebase/firestore'
 
 import {
@@ -74,10 +75,11 @@ export default function AppWrapper ({ children }) {
     }
   }
 
-  function addUserWithConversations (u1_id, u2_id) {
-    const friend_id = [u1_id, u2_id].find(id => id !== user.id)
+  function addUserWithConversations (u1, u2) {
+    console.log(u1,u2);
+    const {participant_id : friend_id} = [u1, u2].find(u => u.participant_id !== user.id)
     // console.log('addUserWithConversations')
-
+    // console.log(u1_id, u2_id)
     getDoc(doc(firestoreDB, `users/${friend_id}`))
       .then(data => {
         if (data.exists()) {
@@ -101,14 +103,15 @@ export default function AppWrapper ({ children }) {
     // Map through conversationsInfo and set up listeners for each friend
     const localPresenceInfo = []
 
-    conversationsInfo.forEach(({ u1_id, u2_id }) => {
-      addUserWithConversations(u1_id, u2_id)
-      const friend_id = [u1_id, u2_id].find(id => id !== user.id)
+    conversationsInfo.forEach(({ participants }) => {
+      console.log(participants)
+      addUserWithConversations(...participants)
+      const { participant_id : friend_id } = [...participants].find(id => id !== user.id)
+
+      console.log(participants)
 
       // Set up the listener and store its reference
       const listener = onValue(ref(realtimeDB, `users/${friend_id}`), snap => {
-        const presenceClone = cloneDeep(presenceInfo)
-
         const user_presenceInfo = localPresenceInfo.find(
           info => info.user_id === friend_id
         )
@@ -128,19 +131,6 @@ export default function AppWrapper ({ children }) {
       })
       listeners.push(listener)
     })
-
-    // console.log(localPresenceInfo)
-    // setPresenceInfo(localPresenceInfo)
-
-    // Clean up listeners when the component unmounts
-    // console.log(listeners)
-    return () => {
-      // listeners.forEach(listener => {
-      //   if (typeof listener === 'function') {
-      //     off(listener)
-      //   }
-      // })
-    }
   }, [conversationsInfo])
 
   useEffect(() => {
@@ -165,34 +155,55 @@ export default function AppWrapper ({ children }) {
       return
     }
 
-    // listener for listening the status of presence
-    // onValue(ref(realtimeDB, `users`), snaps => {
-    //   const presence = []
-    //   snaps.forEach(snap => {
-    //     presence.push(snap.val())
-    //   })
-    //   setPresenceInfo(presence)
-    // })
-
     // setting the listener for message change in each conversation document
-    const setUpSubCollectionListener = (conversation_id, u1_id, u2_id) => {
+    const setUpSubCollectionListener = async (
+      conversation_info,
+      conversations_info
+    ) => {
+      const participants = []
+
+      const participants_firebase = await getDocs(
+        query(
+          collection(
+            firestoreDB,
+            `conversations/${conversation_info.conversation_id}/participants`
+          )
+        )
+      )
+      participants_firebase.docs.forEach(doc => {
+        participants.push(doc.data())
+      })
+      const con_info = conversations_info.find(
+        con => con.conversation_id === conversation_info.conversation_id
+      )
+      con_info.participants = participants // setting participants to each conversation
+
       const mquery = query(
-        collection(firestoreDB, `conversations/${conversation_id}/messages`),
+        collection(
+          firestoreDB,
+          `conversations/${conversation_info.conversation_id}/messages`
+        ),
         orderBy('message_createdAt')
       )
-      
+
       const unsub = onSnapshot(mquery, async snapshots => {
         const messages = []
-        console.log('empty status', snapshots.size);
+
         await Promise.all(
-          snapshots.docs.map(async snapshot => {                // dealing with subcollection
-            if (!snapshot.data().message_deliver && snapshot.data().receiver_id === user.id) {             // its necessary to add docs
+          snapshots.docs.map(async snapshot => {
+            // dealing with subcollection
+            // its necessary to add docs
+            if (
+              !snapshot.data().message_deliver &&
+              snapshot.data().receiver_id === user.id
+            ) {
               await updateDoc(
+                // updating delivery status
                 doc(
                   firestoreDB,
-                  `conversations/${conversation_id}/messages/${
-                    snapshot.data().messageId
-                  }`
+                  `conversations/${
+                    conversation_info.conversation_id
+                  }/messages/${snapshot.data().messageId}`
                 ),
                 {
                   message_deliver: true,
@@ -203,7 +214,9 @@ export default function AppWrapper ({ children }) {
             messages.push(snapshot.data())
           })
         )
-        const friend_id = u1_id === user.id ? u2_id : u1_id
+        const {participant_id : friend_id} = participants.find(
+          participant => participant.participant_id !== user.id
+        )
         setMessages(prev => {
           return {
             ...prev,
@@ -221,27 +234,23 @@ export default function AppWrapper ({ children }) {
     setPresenceInfo([])
 
     const cquery = query(
-      collection(firestoreDB, `conversations`),
-      or(where('u1_id', '==', user.id), where('u2_id', '==', user.id))
+      collection(firestoreDB, `users/${user.id}/conversations`)
     )
 
-    const unSubMessages = onSnapshot(cquery, snapshots => {
-      const conversations_info_from_firebase = []
+    const unSubMessages = onSnapshot(cquery, async snapshots => {
+      const conversations_info_list = []
+      console.log(snapshots.docs)
+      for (const snapshot of snapshots.docs) {
+        conversations_info_list.push(snapshot.data())
+        const conversation_info = snapshot.data()
 
-      snapshots.forEach(snapshot => {
-        conversations_info_from_firebase.push(snapshot.data())
-        const { conversation_id, u1_id, u2_id } = snapshot.data()
-
-        const friend_id = [u1_id, u2_id].find(id => id !== user.id)
-
-        const unsub_subcollection = setUpSubCollectionListener(
-          conversation_id,
-          u1_id,
-          u2_id
+        const unsub_subcollection = await setUpSubCollectionListener(
+          conversation_info,
+          conversations_info_list
         )
         unsub_subcollection_list.push(unsub_subcollection)
-      })
-      setConversationsInfo(conversations_info_from_firebase)
+      }
+      setConversationsInfo(conversations_info_list)
     })
 
     return () => {

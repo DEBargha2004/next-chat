@@ -6,7 +6,7 @@ import { Appstate } from '@/hooks/context'
 
 function ChatMessage ({ message }) {
   const { friends, selectedChatUser } = useContext(Appstate)
-  const { user } = useUser()
+  const { user,isLoaded } = useUser()
 
   const userImageUrl = useMemo(() => {
     if (message.sender_id === user?.id) {
@@ -17,7 +17,7 @@ function ChatMessage ({ message }) {
       )
       return friend_info?.user_img
     }
-  }, [selectedChatUser])
+  }, [selectedChatUser,isLoaded])
 
   return (
     <div

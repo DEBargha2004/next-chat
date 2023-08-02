@@ -9,6 +9,7 @@ import messeage_CreatedAt from '@/functions/timeStamp_userbox'
 import _, { cloneDeep } from 'lodash'
 import { doc, getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
+import messageStatus from '@/functions/messageStaus'
 
 function Userbox ({ item }) {
   const { user } = useUser()
@@ -21,6 +22,17 @@ function Userbox ({ item }) {
       userPresence => userPresence.user_id === item.user_id
     )
   }, [presenceInfo])
+
+  // const showSeenStatus = useMemo(() => {
+  //   if (item.lastMessage.sender_id === user.id) {
+  //     return {
+  //       deliver: item.lastMessage.message_deliver,
+  //       read: item.lastMessage.message_read
+  //     }
+  //   } else {
+  //     return false
+  //   }
+  // }, [item.lastMessage])
 
   const unreadMessages = useMemo(() => {
     const message_info = messages[item.user_id]
@@ -42,7 +54,6 @@ function Userbox ({ item }) {
     return (
       <div className='flex items-center justify-between w-full'>
         <div className='flex items-center w-[90%]'>
-
           {message?.message_type?.image ? (
             <img
               src='https://cdn-icons-png.flaticon.com/512/16/16410.png'
@@ -52,7 +63,7 @@ function Userbox ({ item }) {
           {message?.message_type?.text ? (
             <p className='line-clamp-1'>{message.message_data.text}</p>
           ) : null}
-
+          <span className='ml-2'>{messageStatus(item.lastMessage)}</span>
         </div>
 
         {unread?.length ? (
@@ -60,7 +71,6 @@ function Userbox ({ item }) {
             {unread?.length > 99 ? `99+` : unread?.length}
           </div>
         ) : null}
-
       </div>
     )
   }

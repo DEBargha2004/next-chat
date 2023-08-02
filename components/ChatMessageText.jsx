@@ -6,9 +6,7 @@ import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
 import { doc, setDoc, updateDoc } from 'firebase/firestore'
 import { serverTimestamp } from 'firebase/firestore'
-import deliver_letter_open from '../public/deliver-letter-open.png'
-import deliver_letter_close from '../public/deliver-letter-close.png'
-import delivering_letter from '../public/delivering-letter.png'
+import messageStatus from '@/functions/messageStaus'
 
 function ChatMessageText ({ message }) {
   const { user } = useUser()
@@ -22,10 +20,7 @@ function ChatMessageText ({ message }) {
 
   const showSeenStatus = useMemo(() => {
     if (message.sender_id === user.id) {
-      return {
-        deliver: message.message_deliver,
-        read: message.message_read
-      }
+      return true
     } else {
       return false
     }
@@ -58,25 +53,7 @@ function ChatMessageText ({ message }) {
           showSeenStatus ? 'justify-between' : 'justify-end'
         } items-center`}
       >
-        {showSeenStatus ? (
-          showSeenStatus.deliver ? (
-            showSeenStatus.read ? (
-              <img
-                src={deliver_letter_open.src}
-                className='h-4 w-auto'
-                alt=''
-              />
-            ) : (
-              <img
-                src={deliver_letter_close.src}
-                className='h-4 w-auto'
-                alt=''
-              />
-            )
-          ) : (
-            <img src={delivering_letter.src} className='h-4 w-auto' alt='' />
-          )
-        ) : null}
+        {messageStatus(message,1)}
         <p>{messageTime}</p>
       </div>
     </div>

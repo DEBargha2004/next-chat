@@ -49,15 +49,63 @@ function ChatInput () {
     return unique_id
   }
 
+  async function addConInfoInUser ({ conversation_id }) {
+    const users_con = id => `users/${id}/conversations/${conversation_id}`
+    const con = () => `conversations/${conversation_id}`
+    if (selectedChatUser.isGroup) {
+      // Do Something
+    } else {
+      const sender_id = user.id
+      const receiver_id = selectedChatUser.current_User_Id
+
+      const createdAt = serverTimestamp()
+
+      const users_sender_con = await getDoc(
+        doc(firestoreDB, users_con(sender_id))
+      )
+      const users_receiver_con = await getDoc(
+        doc(firestoreDB, users_con(receiver_id))
+      )
+      const con_info = await getDoc(doc(firestoreDB, con()))
+
+      if (!users_sender_con.exists()) {
+        await setDoc(doc(firestoreDB, users_con(sender_id)), {
+          conversation_id,
+          createdAt,
+          type: 'one-one'
+        })
+      }
+      if (!users_receiver_con.exists()) {
+        await setDoc(doc(firestoreDB, users_con(receiver_id)), {
+          conversation_id,
+          createdAt,
+          type: 'one-one'
+        })
+      }
+      if (!con_info.exists()) {
+        await setDoc(doc(firestoreDB, con()), {
+          conversation_id,
+          createdAt,
+          type: 'one-one'
+        })
+        await setDoc(doc(firestoreDB, con(), `participants/${sender_id}`), {
+          participant_id: sender_id
+        })
+        await setDoc(doc(firestoreDB, con(), `participants/${receiver_id}`), {
+          participant_id: receiver_id
+        })
+      }
+    }
+  }
+
   const shareMessage = async ({
     conversation_id,
-    conversation_info,
     message
   }) => {
-    const con_Ref = doc(firestoreDB, `conversations/${conversation_id}`)
 
-    const docInfo = await getDoc(con_Ref)
     const message_collection_path = `conversations/${conversation_id}/messages`
+
+    await addConInfoInUser({ conversation_id })
 
     const messageId = v4()
 
@@ -66,24 +114,7 @@ function ChatInput () {
       messageId
     }
 
-    // console.log(message_collection_path)
-
-    if (docInfo.exists()) {
-      await setDoc(
-        doc(firestoreDB, message_collection_path, messageId),
-        message
-      )
-    } else {
-      await setDoc(
-        doc(firestoreDB, `conversations/${conversation_id}`),
-        conversation_info
-      )
-
-      await setDoc(
-        doc(firestoreDB, message_collection_path, messageId),
-        message
-      )
-    }
+    await setDoc(doc(firestoreDB, message_collection_path, messageId), message)
 
     setUserInput('')
     abortImage()
@@ -114,12 +145,6 @@ function ChatInput () {
     const message_deliver = false
     const message_deliveredAt = null
 
-    const conversation_info = {
-      conversation_id,
-      u1_id: sender_id,
-      u2_id: receiver_id
-    }
-
     const message = {
       conversation_id,
       sender_id,
@@ -137,13 +162,30 @@ function ChatInput () {
 
     imageInfo.info && (await uploadBytes(contentRef, imageInfo.info))
     ;(userInput || imageInfo.info) &&
-      (await shareMessage({ conversation_id, conversation_info, message }))
+      (await shareMessage({ conversation_id, message }))
   }
 
   const abortImage = () => {
     setImageInfo({ info: null, url: null })
   }
 
+  useEffect(() => {
+    const handleEmojisClose = e => {
+      if (!e.target.contains(emoji_icon)) {
+        setEmojiButtonStatus(prev => ({
+          ...prev,
+          clicked: false,
+          hover: false
+        }))
+      }
+    }
+
+
+    const emoji_icon = document.getElementById('emoji_icon')
+    window.addEventListener('click', handleEmojisClose)
+
+    return () => window.removeEventListener('click', handleEmojisClose)
+  }, [])
 
   return (
     <div className='min-h-[64px] flex items-center justify-between px-5 relative'>
@@ -204,11 +246,13 @@ function ChatInput () {
           onClick={() =>
             setEmojiButtonStatus(prev => ({ ...prev, clicked: !prev.clicked }))
           }
+          id='emojis'
         >
           <img
             src='https://cdn-icons-png.flaticon.com/512/166/166538.png'
             className='h-8 cursor-pointer'
             alt=''
+            id='emoji_icon'
           />
           {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
             <div className='absolute bottom-8'>
