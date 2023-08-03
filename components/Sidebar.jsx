@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from 'react'
 import FriendList from './FriendList'
 import { Appstate } from '@/hooks/context'
 import FriendSearch from './FriendSearch'
+import Topbar from './Topbar'
 
 function Sidebar ({ className }) {
   const { setSelectedChatUser, selectedService } = useContext(Appstate)
@@ -23,6 +24,7 @@ function Sidebar ({ className }) {
   },[])
   return (
     <div className={`${className} overflow-y-scroll sidebar`} ref={sidebarRef}>
+      <Topbar />
       <FriendSearch />
       <FriendList />
     </div>

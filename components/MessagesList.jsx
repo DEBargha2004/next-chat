@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useContext, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 import ChatMessage from './ChatMessage'
 
-function MessagesList ({ list }) {
+function MessagesList ({  }) {
   const messagesListRef = useRef(null)
   const { messages, selectedChatUser } = useContext(Appstate)
 

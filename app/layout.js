@@ -23,7 +23,7 @@ export default function RootLayout ({ children }) {
             sizes='any'
           />
         </head>
-        <body className={inter.className}>
+        <body className={`${inter.className}`}>
           <GlobalAppStateProvider>
             {userId ? <AppWrapper>{children}</AppWrapper> : children}
           </GlobalAppStateProvider>

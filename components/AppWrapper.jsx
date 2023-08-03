@@ -6,6 +6,7 @@ import { useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import { firestoreDB, realtimeDB } from '../firebase.config'
 import Sidenav from '@/components/Sidenav'
+import { serviceList } from '@/constants/serviceList'
 import {
   collection,
   doc,
@@ -32,9 +33,11 @@ import {
   off
 } from 'firebase/database'
 import { cloneDeep } from 'lodash'
+import { useRouter } from 'next/navigation'
 
 export default function AppWrapper ({ children }) {
   const { isSignedIn, user, isLoaded } = useUser()
+  const router = useRouter()
 
   const {
     setFriends,
@@ -232,7 +235,6 @@ export default function AppWrapper ({ children }) {
         const conversation_info = snapshot.data()
         conversations_info_list.push(conversation_info)
 
-        console.log(conversation_info)
         const unsub_subcollection = await setUpSubCollectionListener(
           conversation_info,
           conversations_info_list
@@ -275,6 +277,17 @@ export default function AppWrapper ({ children }) {
       document.removeEventListener('visibilitychange',handleVisibileStatus)
     }
   }, [isLoaded])
+
+  useEffect(()=>{
+    const appPath = location.pathname
+    const pathArray = appPath.split('/')
+    serviceList.forEach(service => {
+      if(pathArray.includes(service.service)){
+        router.push(service.to)
+      }
+    })
+    
+  },[])
 
   return (
     <div className='h-full'>

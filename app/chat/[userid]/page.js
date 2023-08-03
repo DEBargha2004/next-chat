@@ -5,10 +5,10 @@ import ChatInput from '@/components/ChatInput'
 import MessagesList from '@/components/MessagesList'
 import { selectUser } from '@/functions/selectUser'
 import { Appstate } from '@/hooks/context'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 
 export default function page ({ params }) {
-  const { friends, selectedChatUser, setSelectedChatUser } =
+  const { friends, selectedChatUser, setSelectedChatUser,messages } =
     useContext(Appstate)
   const full_userid = `user_${params.userid}`
   const [showChatPage, setShowChatPage] = useState(true)
@@ -27,13 +27,14 @@ export default function page ({ params }) {
     }
   }, [friends])
 
+
   
   return (
     <div className='w-full h-full'>
       {showChatPage ? (
         <>
           <ChatBoxHeader />
-          <MessagesList />
+          <MessagesList  />
           <ChatInput />
         </>
       ) : (

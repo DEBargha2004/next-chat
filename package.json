@@ -27,6 +27,7 @@
     "react-dom": "18.2.0",
     "react-instantsearch-hooks-web": "^6.47.3",
     "server-only": "^0.0.1",
+    "tailwind-scrollbar": "^3.0.4",
     "tailwindcss": "3.3.3",
     "uuid": "^9.0.0"
   }
