@@ -25,7 +25,9 @@ function ChatBoxHeader () {
           <p>{selectedChatUser?.current_User_Name}</p>
           <p className={`text-slate-500 text-sm`}>
             {user_presence_info.online
-              ? 'online'
+              ? user_presence_info.online === 'away'
+                ? '😴'
+                : '🙂'
               : user_presence_info?.last_Seen}
           </p>
         </div>

@@ -29,6 +29,8 @@ function Userbox ({ item }) {
     const unread_message_info = message_info?.filter(
       message => !message.message_read && message.receiver_id === user.id
     )
+
+    
     return unread_message_info
   }, [messages[item.user_id]])
 
@@ -37,9 +39,11 @@ function Userbox ({ item }) {
     const last_message_info = _.maxBy(messages_info, item =>
       _.get(item, 'message_createdAt.seconds')
     )
-    console.log(messages_info,last_message_info);
-    return last_message_info
+    // console.log(messages_info,last_message_info);
+    return {...last_message_info}
   }, [messages[item.user_id]])
+
+  console.log('last message is ',lastMessage);
 
   const OverviewOfLast = ({ message, unread }) => {
     return (
@@ -54,7 +58,7 @@ function Userbox ({ item }) {
           {message?.message_type?.text ? (
             <p className='line-clamp-1'>{message.message_data.text}</p>
           ) : null}
-          <span className='ml-2'>{messageStatus(item.lastMessage)}</span>
+          <span className='ml-2'>{messageStatus(lastMessage)}</span>
         </div>
 
         {unread?.length ? (
@@ -88,7 +92,7 @@ function Userbox ({ item }) {
           </p>
         </div>
         <div className='text-slate-500 text-[14px]'>
-          <OverviewOfLast message={item.lastMessage} unread={unreadMessages} />
+          <OverviewOfLast message={lastMessage} unread={unreadMessages} />
         </div>
       </div>
     </div>

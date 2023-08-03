@@ -249,15 +249,32 @@ export default function AppWrapper ({ children }) {
     }
   }, [isLoaded])
 
+  const handleVisibileStatus = () => {
+    if(document.hidden){
+      update(ref(realtimeDB,`users/${user?.id}`),{
+        online : 'away'
+      })
+    }else{
+      update(ref(realtimeDB,`users/${user?.id}`),{
+        online : true
+      })
+    }
+  }
+
   // socket connection for managing presence status
   useEffect(() => {
-    onDisconnect(
+     isLoaded && onDisconnect(
       ref(realtimeDB, `users/${user?.id || localStorage.getItem(`user_id`)}`)
     ).update({
       online: false,
       last_seen: new Date().toString()
     })
-  }, [])
+
+    isLoaded && document.addEventListener('visibilitychange',handleVisibileStatus)
+    return () => {
+      document.removeEventListener('visibilitychange',handleVisibileStatus)
+    }
+  }, [isLoaded])
 
   return (
     <div className='h-full'>
