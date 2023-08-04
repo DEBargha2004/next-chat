@@ -18,7 +18,7 @@ function ServiceComponent ({ url, index, to }) {
         className={`p-2 rounded-md transition-all hover:bg-slate-200 relative flex justify-between items-center ${selectedService === to ? `bg-slate-200` : `` }`}
         onClick={() => setSelectedService(to)}
       >
-        {selectedService === to ? (
+        {to.includes(selectedService) ? (
           <motion.div
             initial={{ height: 0 }}
             animate={{ height: `28px` }}

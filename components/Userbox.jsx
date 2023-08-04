@@ -43,7 +43,6 @@ function Userbox ({ item }) {
     return {...last_message_info}
   }, [messages[item.user_id]])
 
-  console.log('last message is ',lastMessage);
 
   const OverviewOfLast = ({ message, unread }) => {
     return (

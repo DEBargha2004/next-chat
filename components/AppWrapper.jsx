@@ -7,32 +7,15 @@ import { useEffect, useState } from 'react'
 import { firestoreDB, realtimeDB } from '../firebase.config'
 import Sidenav from '@/components/Sidenav'
 import { serviceList } from '@/constants/serviceList'
-import {
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  query,
-  where,
-  onSnapshot,
-  updateDoc,
-  or,
-  orderBy,
-  getDocs
-} from 'firebase/firestore'
+import { collection, query, onSnapshot } from 'firebase/firestore'
 
-import {
-  ref,
-  set,
-  onValue,
-  update,
-  onDisconnect,
-  goOffline,
-  goOnline,
-  off
-} from 'firebase/database'
-import { cloneDeep } from 'lodash'
+import { updateFriendsAndStatus } from '@/functions/updateFriendsAndStatus'
+import { setUpSubCollectionListener } from '@/functions/subCollectionListener'
+
+import { ref, onDisconnect, goOffline, goOnline } from 'firebase/database'
+
+import { handleVisibileStatus } from '@/functions/handleVisibleStatus'
+import { includeUser } from '@/functions/includeUser'
 import { useRouter } from 'next/navigation'
 
 export default function AppWrapper ({ children }) {
@@ -45,105 +28,24 @@ export default function AppWrapper ({ children }) {
     setMessages,
     setConversationsInfo,
     conversationsInfo,
-    friends,
-    presenceInfo
+    setSelectedService
   } = useContext(Appstate)
 
-  const [userid, setUserid] = useState(null)
   const [connection, setConnection] = useState(false)
 
-  async function includeUser () {
-    const docRef = doc(firestoreDB, 'users', user.id)
-    const docSnap = await getDoc(docRef)
-    localStorage.setItem('user_id', user.id)
-    setUserid(user.id)
-    if (!docSnap.exists()) {
-      setDoc(doc(firestoreDB, 'users', user.id), {
-        user_name: user.fullName,
-        user_email: user.primaryEmailAddress.emailAddress,
-        user_id: user.id,
-        user_img: user.imageUrl,
-        user_createdAt: serverTimestamp()
-      })
-      set(ref(realtimeDB, `users/${user.id}`), {
-        user_id: user.id,
-        online: true,
-        last_seen: new Date().toString()
-      })
-    } else {
-      const dataRef = ref(realtimeDB, `users/${user.id}`)
-      update(dataRef, {
-        online: true
-      })
-    }
-  }
-
-  async function addUserWithConversations (participants) {
-    let friend_id = participants.find(
-      participant_id => participant_id !== user.id
-    )
-
-    try {
-      const data = await getDoc(doc(firestoreDB, `users/${friend_id}`))
-      if (data.exists()) {
-        return data.data()
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
   useEffect(() => {
-    async function updateFriendsAndStatus () {
-      setFriends([])
-
-      const listeners = []
-
-      const localPresenceInfo = []
-      const friends_info = []
-
-      for (const conversation_info of conversationsInfo) {
-        const participants = conversation_info.participants
-
-        const friend_info = await addUserWithConversations(participants)
-        friends_info.push(friend_info)
-
-        let friend_id = participants.find(id => id !== user.id)
-
-        // Set up the listener and store its reference
-        const listener = onValue(
-          ref(realtimeDB, `users/${friend_id}`),
-          snap => {
-            const user_presenceInfo = localPresenceInfo.find(
-              info => info.user_id === friend_id
-            )
-            if (!user_presenceInfo) {
-              localPresenceInfo.push(snap.val())
-            } else {
-              const index = _.findIndex(
-                localPresenceInfo,
-                obj => obj.user_id === friend_id
-              )
-
-              localPresenceInfo.splice(index, 1, snap.val())
-              // console.log(snap.val());
-            }
-            console.log(localPresenceInfo, 'before setting')
-            setPresenceInfo([...localPresenceInfo])
-          }
-        )
-        listeners.push(listener)
-      }
-
-      setFriends([...friends_info])
-    }
-
-    updateFriendsAndStatus()
+    setFriends([])
+    updateFriendsAndStatus({
+      conversationsInfo,
+      setFriends,
+      setPresenceInfo,
+      user
+    })
   }, [conversationsInfo])
 
   useEffect(() => {
     if (isSignedIn && isLoaded && connection) {
-      includeUser()
+      includeUser({ user })
     }
   }, [isLoaded, isSignedIn, connection])
 
@@ -164,61 +66,6 @@ export default function AppWrapper ({ children }) {
     }
 
     // setting the listener for message change in each conversation document
-    const setUpSubCollectionListener = async (
-      conversation_info,
-      conversations_info
-    ) => {
-      console.log(conversation_info)
-      const mquery = query(
-        collection(
-          firestoreDB,
-          `conversations/${conversation_info.conversation_id}/messages`
-        ),
-        orderBy('message_createdAt')
-      )
-
-      const unsub = onSnapshot(mquery, async snapshots => {
-        const messages = []
-
-        await Promise.all(
-          snapshots.docs.map(async snapshot => {
-            // dealing with subcollection
-            // its necessary to add docs
-            if (
-              !snapshot.data().message_deliver &&
-              snapshot.data().receiver_id === user.id
-            ) {
-              await updateDoc(
-                // updating delivery status
-                doc(
-                  firestoreDB,
-                  `conversations/${
-                    conversation_info.conversation_id
-                  }/messages/${snapshot.data().messageId}`
-                ),
-                {
-                  message_deliver: true,
-                  message_deliveredAt: serverTimestamp()
-                }
-              )
-            }
-            messages.push(snapshot.data())
-          })
-        )
-        let friend_id = conversation_info.participants.find(
-          participant_id => participant_id !== user.id
-        )
-
-        setMessages(prev => {
-          return {
-            ...prev,
-            [friend_id]: messages
-          }
-        })
-      })
-
-      return unsub
-    }
 
     setFriends([])
     const unsub_subcollection_list = []
@@ -235,10 +82,11 @@ export default function AppWrapper ({ children }) {
         const conversation_info = snapshot.data()
         conversations_info_list.push(conversation_info)
 
-        const unsub_subcollection = await setUpSubCollectionListener(
+        const unsub_subcollection = await setUpSubCollectionListener({
           conversation_info,
-          conversations_info_list
-        )
+          user,
+          setMessages
+        })
         unsub_subcollection_list.push(unsub_subcollection)
       }
       setConversationsInfo(conversations_info_list)
@@ -251,43 +99,36 @@ export default function AppWrapper ({ children }) {
     }
   }, [isLoaded])
 
-  const handleVisibileStatus = () => {
-    if(document.hidden){
-      update(ref(realtimeDB,`users/${user?.id}`),{
-        online : 'away'
-      })
-    }else{
-      update(ref(realtimeDB,`users/${user?.id}`),{
-        online : true
-      })
-    }
-  }
-
   // socket connection for managing presence status
   useEffect(() => {
-     isLoaded && onDisconnect(
-      ref(realtimeDB, `users/${user?.id || localStorage.getItem(`user_id`)}`)
-    ).update({
-      online: false,
-      last_seen: new Date().toString()
-    })
+    isLoaded &&
+      onDisconnect(
+        ref(realtimeDB, `users/${user?.id || localStorage.getItem(`user_id`)}`)
+      ).update({
+        online: false,
+        last_seen: new Date().toString()
+      })
 
-    isLoaded && document.addEventListener('visibilitychange',handleVisibileStatus)
+    isLoaded &&
+      document.addEventListener('visibilitychange', () =>
+        handleVisibileStatus(user)
+      )
     return () => {
-      document.removeEventListener('visibilitychange',handleVisibileStatus)
+      document.removeEventListener('visibilitychange', () =>
+        handleVisibileStatus(user)
+      )
     }
   }, [isLoaded])
 
-  useEffect(()=>{
+  useEffect(() => {
     const appPath = location.pathname
     const pathArray = appPath.split('/')
     serviceList.forEach(service => {
-      if(pathArray.includes(service.service)){
-        router.push(service.to)
+      if (pathArray.includes(service.service)) {
+        setSelectedService(service.to)
       }
     })
-    
-  },[])
+  }, [])
 
   return (
     <div className='h-full'>

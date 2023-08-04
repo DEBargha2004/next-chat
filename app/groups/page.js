@@ -1,5 +1,5 @@
-function page () {
+function Page () {
   return <p>Groups</p>
 }
 
-export default page
+export default Page

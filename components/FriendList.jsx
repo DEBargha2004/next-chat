@@ -6,14 +6,15 @@ import Link from 'next/link'
 import { doc, getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 
-function FriendList () {
-  const { friends, messages, setFriends, searchedFriend,searchQuery } = useContext(Appstate)
+function FriendList ({ UserboxComponent }) {
+  const { friends, messages, setFriends, searchedFriend, searchQuery } =
+    useContext(Appstate)
 
   const generate_hybrid = ({ friendList, searchList }) => {
     const hybridArray = searchList.map(user => {
       const user_id_search = user.user_id
       const user_friendList = friendList.find(
-        friend => friend.user_id === user_id_search 
+        friend => friend.user_id === user_id_search
       )
       if (user_friendList) {
         return user_friendList
@@ -41,7 +42,8 @@ function FriendList () {
       } catch (error) {
         // console.log(error, 'in friendlist')
       }
-      return prev
+      console.log(prev);
+      return [...prev]
     })
   }, [messages])
 
@@ -59,9 +61,7 @@ function FriendList () {
     let friends_withConversation = []
 
     friends_withNoCoversation = friends.filter(friend => !friend.lastMessage)
-    friends_withConversation = friends.filter(
-      friend => friend.lastMessage
-    )
+    friends_withConversation = friends.filter(friend => friend.lastMessage)
 
     friends_withConversation.sort((u1, u2) => {
       return (
@@ -85,7 +85,7 @@ function FriendList () {
         const link_ref = item?.user_id?.replace('user_', '')
         return (
           <Link href={`/chat/${link_ref}`} key={link_ref}>
-            <Userbox item={item} />
+            <UserboxComponent item={item} />
           </Link>
         )
       })}
