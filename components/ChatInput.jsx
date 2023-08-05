@@ -3,29 +3,24 @@ import { v4, v5 } from 'uuid'
 import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
 import { firestoreDB, contentDB } from '../firebase.config'
-import {
-  setDoc,
-  doc,
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDoc,
-  getDocs
-} from 'firebase/firestore'
-import { motion } from 'framer-motion'
+import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore'
 import { ref, uploadBytes } from 'firebase/storage'
 import Picker from '@emoji-mart/react'
-import data from '@emoji-mart/data'
 import { cloneDeep } from 'lodash'
+import { abortImage } from '@/functions/abortImage'
 
 function ChatInput () {
   const { user } = useUser()
-  const { selectedChatUser } = useContext(Appstate)
+  const {
+    selectedChatUser,
+    imageInfo,
+    setImageInfo,
+    refMessageInfo,
+    referenceMessage,
+    setReferenceMessage
+  } = useContext(Appstate)
   const userInputRef = useRef(null)
   const [userInput, setUserInput] = useState('')
-  const [imageInfo, setImageInfo] = useState({ url: null, info: null })
   const [emojiButtonStatus, setEmojiButtonStatus] = useState({
     clicked: false,
     hover: false
@@ -116,7 +111,8 @@ function ChatInput () {
     await setDoc(doc(firestoreDB, message_collection_path, messageId), message)
 
     setUserInput('')
-    abortImage()
+    abortImage(setImageInfo)
+    setReferenceMessage(null)
   }
 
   const handleMessageSubmit = async e => {
@@ -143,6 +139,7 @@ function ChatInput () {
     const message_readAt = null
     const message_deliver = false
     const message_deliveredAt = null
+    const refMessage = referenceMessage ? refMessageInfo : null
 
     const message = {
       conversation_id,
@@ -154,18 +151,16 @@ function ChatInput () {
       message_read,
       message_readAt,
       message_deliver,
-      message_deliveredAt
+      message_deliveredAt,
+      refMessage
     }
+
 
     const contentRef = ref(contentDB, imageName)
 
     imageInfo.info && (await uploadBytes(contentRef, imageInfo.info))
     ;(userInput || imageInfo.info) &&
       (await shareMessage({ conversation_id, message }))
-  }
-
-  const abortImage = () => {
-    setImageInfo({ info: null, url: null })
   }
 
   useEffect(() => {
@@ -186,29 +181,9 @@ function ChatInput () {
   }, [])
 
   return (
-    <div className='min-h-[64px] flex items-center justify-between px-5 relative'>
-      {imageInfo?.url ? (
-        <div className='absolute h-[250px] bottom-[64px]'>
-          <motion.img
-            layout
-            src={imageInfo.url}
-            className='h-full transition-all'
-            alt=''
-          />
-          <div
-            className='absolute right-0 top-0 h-5 w-5 transition-all hover:bg-cyan-500 hover:filter hover:invert flex justify-center items-center'
-            onClick={abortImage}
-          >
-            <img
-              src='https://cdn-icons-png.flaticon.com/512/1828/1828778.png'
-              className='h-[80%]'
-              alt=''
-            />
-          </div>
-        </div>
-      ) : null}
+    <div className='min-h-[64px] flex items-center justify-between relative'>
       <form
-        className='flex w-full justify-between items-center'
+        className='flex w-full justify-between items-center px-5'
         onSubmit={handleMessageSubmit}
       >
         <input

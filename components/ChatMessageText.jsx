@@ -4,12 +4,14 @@ import { contentDB, firestoreDB } from '../firebase.config'
 import { getDownloadURL, ref } from 'firebase/storage'
 import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
-import { doc, setDoc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { serverTimestamp } from 'firebase/firestore'
 import messageStatus from '@/functions/messageStaus'
+import RefMessage from './RefMessage'
 
 function ChatMessageText ({ message }) {
   const { user } = useUser()
+
   const messageTime = useMemo(() => {
     const time = format(
       new Date(message.message_createdAt?.seconds * 1000 || new Date()),
@@ -47,13 +49,14 @@ function ChatMessageText ({ message }) {
         message.message_type === 'text' ? `px-4` : `px-2`
       } mx-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white min-w-[100px] max-w-[300px]`}
     >
+      <RefMessage refMessageInfo={message.refMessage} className={`mb-2`} />
       <ChatMessageComponent {...{ message }} />
       <div
         className={`w-full text-[10px] flex ${
           showSeenStatus ? 'justify-between' : 'justify-end'
         } items-center`}
       >
-        {messageStatus(message,1)}
+        {messageStatus(message, 1)}
         <p>{messageTime}</p>
       </div>
     </div>

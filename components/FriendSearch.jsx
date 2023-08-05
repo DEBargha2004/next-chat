@@ -2,14 +2,9 @@ import { useEffect } from 'react'
 
 export default function FriendSearch ({
   onChange,
-  value,
-  setSearchedItemsStorage
+  value
 }) {
-  useEffect(() => {
-    if (!value) {
-      setSearchedItemsStorage && setSearchedItemsStorage([])
-    }
-  }, [value])
+
 
   return (
     <div className='w-full p-2 my-2 px-4 rounded-md box-border'>

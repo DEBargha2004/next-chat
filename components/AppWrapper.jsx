@@ -20,7 +20,6 @@ import { useRouter } from 'next/navigation'
 
 export default function AppWrapper ({ children }) {
   const { isSignedIn, user, isLoaded } = useUser()
-  const router = useRouter()
 
   const {
     setFriends,
@@ -113,6 +112,8 @@ export default function AppWrapper ({ children }) {
       document.addEventListener('visibilitychange', () =>
         handleVisibileStatus(user)
       )
+
+    
     return () => {
       document.removeEventListener('visibilitychange', () =>
         handleVisibileStatus(user)

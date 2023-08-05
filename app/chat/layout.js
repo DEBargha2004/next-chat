@@ -7,7 +7,7 @@ import FriendList from '@/components/FriendList'
 import Userbox from '@/components/Userbox'
 import { serviceList } from '@/constants/serviceList'
 import { useUser } from '@clerk/nextjs'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { Appstate } from '@/hooks/context'
 
 export default function RootLayout ({ children }) {
@@ -23,7 +23,7 @@ export default function RootLayout ({ children }) {
       return
     }
     let searchList = await fetch(
-      `/api/searchUser?userId=${user.id}&query=${e.target.value}`,
+      `/api/searchUser?userId=${user.id}&query=${e.target.value}&con_type=one-one-chat`,
       {
         method: 'GET'
       }
@@ -34,15 +34,17 @@ export default function RootLayout ({ children }) {
     setSearchedFriend(searchList)
   }
 
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchedFriend && setSearchedFriend([])
+    }
+  }, [searchQuery])
+
   return (
     <>
       <Sidebar className={`w-[30%] border-r-[1px] border-slate-400`}>
         <Topbar linkedElement={groupElement} />
-        <FriendSearch
-          onChange={handleSearchUser}
-          value={searchQuery}
-          setSearchedItemsStorage={setSearchedFriend}
-        />
+        <FriendSearch onChange={handleSearchUser} value={searchQuery} />
         <FriendList UserboxComponent={Userbox} />
       </Sidebar>
       <div className='w-[70%] h-full'>{children}</div>
