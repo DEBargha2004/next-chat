@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
 
-export default function FriendSearch ({
+
+export default function Searchbar ({
   onChange,
-  value
+  value,
+  placeholder
 }) {
 
 
@@ -12,7 +13,7 @@ export default function FriendSearch ({
         <input
           type='text'
           className='outline-none border-[1px] border-slate-400 w-full h-10 px-2 text-slate-600 border-b-4 border-b-indigo-500 rounded-md'
-          placeholder='search a friend or a group'
+          placeholder={placeholder}
           onChange={onChange}
           value={value}
         />

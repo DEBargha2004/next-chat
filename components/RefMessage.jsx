@@ -1,6 +1,3 @@
-import { Appstate } from '@/hooks/context'
-import { useContext } from 'react'
-
 function RefMessage ({ refMessageInfo,onClick,className }) {
 
   
@@ -11,7 +8,7 @@ function RefMessage ({ refMessageInfo,onClick,className }) {
     >
       <div className='h-full w-2 absolute -left-1 top-0' style={{backgroundColor : refMessageInfo.marker_color}} />
       <div className='pl-2'>
-        <h1 className={``} style={{ color: refMessageInfo.marker_color }}>
+        <h1 className={`text-sm`} style={{ color: refMessageInfo.marker_color }}>
           {refMessageInfo?.sender}
         </h1>
         <div className='flex items-center'>

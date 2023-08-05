@@ -11,7 +11,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 import messageStatus from '@/functions/messageStaus'
 
-function Userbox ({ item }) {
+function Userbox ({ item, include,onClick }) {
   const { user } = useUser()
   const { setSelectedChatUser, selectedChatUser, presenceInfo, messages } =
     useContext(Appstate)
@@ -23,14 +23,12 @@ function Userbox ({ item }) {
     )
   }, [presenceInfo])
 
-
   const unreadMessages = useMemo(() => {
     const message_info = messages[item.user_id]
     const unread_message_info = message_info?.filter(
       message => !message.message_read && message.receiver_id === user.id
     )
 
-    
     return unread_message_info
   }, [messages[item.user_id]])
 
@@ -40,9 +38,8 @@ function Userbox ({ item }) {
       _.get(item, 'message_createdAt.seconds')
     )
     // console.log(messages_info,last_message_info);
-    return {...last_message_info}
+    return { ...last_message_info }
   }, [messages[item.user_id]])
-
 
   const OverviewOfLast = ({ message, unread }) => {
     return (
@@ -76,14 +73,14 @@ function Userbox ({ item }) {
           ? `bg-gray-200`
           : `bg-white`
       }`}
-      onClick={() => selectUser({ setSelectedChatUser, item: item })}
+      onClick={onClick}
     >
       <Avatar url={item.user_img} online={user_presense_info?.online} />
       <div className='h-10 ml-4 flex flex-col justify-center w-[75%]'>
         <div className='flex justify-between items-center'>
           <h1 className='flex items-center font-semibold'>{item.user_name}</h1>
           <p className='text-sm'>
-            {lastMessage
+            {lastMessage && include?.lastMessageTime
               ? messeage_CreatedAt(
                   lastMessage.message_createdAt?.seconds * 1000 || null
                 )
@@ -91,7 +88,9 @@ function Userbox ({ item }) {
           </p>
         </div>
         <div className='text-slate-500 text-[14px]'>
-          <OverviewOfLast message={lastMessage} unread={unreadMessages} />
+          {include?.lastMessage ? (
+            <OverviewOfLast message={lastMessage} unread={unreadMessages} />
+          ) : null}
         </div>
       </div>
     </div>

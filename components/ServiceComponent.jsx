@@ -15,7 +15,7 @@ function ServiceComponent ({ url, index, to }) {
   return (
     <Link href={to ? to : ''}>
       <div
-        className={`p-2 rounded-md transition-all hover:bg-slate-200 relative flex justify-between items-center ${selectedService === to ? `bg-slate-200` : `` }`}
+        className={`p-2 rounded-md transition-all hover:bg-slate-200 relative flex justify-between items-center ${to.includes(selectedService) ? `bg-slate-200` : `` }`}
         onClick={() => setSelectedService(to)}
       >
         {to.includes(selectedService) ? (

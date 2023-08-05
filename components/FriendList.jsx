@@ -3,28 +3,15 @@ import { useContext, useEffect, useMemo } from 'react'
 import { Appstate } from '@/hooks/context'
 import { cloneDeep } from 'lodash'
 import Link from 'next/link'
-import { doc, getDoc } from 'firebase/firestore'
-import { firestoreDB } from '@/firebase.config'
+import { useRouter } from 'next/navigation'
+import { generate_hybrid } from '@/functions/generate_hybrid'
+import { selectUser } from '@/functions/selectUser'
 
 function FriendList ({ UserboxComponent }) {
-  const { friends, messages, setFriends, searchedFriend, searchQuery } =
+  const { friends, messages, setFriends, searchedFriend, searchQuery,setSelectedChatUser } =
     useContext(Appstate)
+  const router = useRouter()
 
-  const generate_hybrid = ({ friendList, searchList }) => {
-    const hybridArray = searchList.map(user => {
-      const user_id_search = user.user_id
-      const user_friendList = friendList.find(
-        friend => friend.user_id === user_id_search
-      )
-      if (user_friendList) {
-        return user_friendList
-      } else {
-        return user
-      }
-    })
-
-    return hybridArray
-  }
   //Adding lastMessage to every friend object
   useEffect(() => {
     // console.log('at useEffect Friendlist')
@@ -42,7 +29,7 @@ function FriendList ({ UserboxComponent }) {
       } catch (error) {
         // console.log(error, 'in friendlist')
       }
-      console.log(prev);
+      console.log(prev)
       return [...prev]
     })
   }, [messages])
@@ -85,7 +72,11 @@ function FriendList ({ UserboxComponent }) {
         const link_ref = item?.user_id?.replace('user_', '')
         return (
           <Link href={`/chat/${link_ref}`} key={link_ref}>
-            <UserboxComponent item={item} />
+            <UserboxComponent
+              item={item}
+              include={{ lastMessage: true, lastMessageTime: true }}
+              onClick = {() => selectUser({ setSelectedChatUser, item: item })}
+            />
           </Link>
         )
       })}
