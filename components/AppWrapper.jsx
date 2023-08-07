@@ -1,25 +1,25 @@
-'use client'
+"use client";
 
-import { Appstate } from '@/hooks/context'
-import { useContext } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { useEffect, useState } from 'react'
-import { firestoreDB, realtimeDB } from '../firebase.config'
-import Sidenav from '@/components/Sidenav'
-import { serviceList } from '@/constants/serviceList'
-import { collection, query, onSnapshot } from 'firebase/firestore'
+import { Appstate } from "@/hooks/context";
+import { useContext } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { firestoreDB, realtimeDB } from "../firebase.config";
+import Sidenav from "@/components/Sidenav";
+import { serviceList } from "@/constants/serviceList";
+import { collection, query, onSnapshot } from "firebase/firestore";
 
-import { updateFriendsAndStatus } from '@/functions/updateFriendsAndStatus'
-import { setUpSubCollectionListener } from '@/functions/subCollectionListener'
+import { updateFriendsAndStatus } from "@/functions/updateFriendsAndStatus";
+import { setUpSubCollectionListener } from "@/functions/subCollectionListener";
 
-import { ref, onDisconnect, goOffline, goOnline } from 'firebase/database'
+import { ref, onDisconnect, goOffline, goOnline } from "firebase/database";
 
-import { handleVisibileStatus } from '@/functions/handleVisibleStatus'
-import { includeUser } from '@/functions/includeUser'
-import { useRouter } from 'next/navigation'
+import { handleVisibileStatus } from "@/functions/handleVisibleStatus";
+import { includeUser } from "@/functions/includeUser";
+import { useRouter } from "next/navigation";
 
-export default function AppWrapper ({ children }) {
-  const { isSignedIn, user, isLoaded } = useUser()
+export default function AppWrapper({ children }) {
+  const { isSignedIn, user, isLoaded } = useUser();
 
   const {
     setFriends,
@@ -27,76 +27,77 @@ export default function AppWrapper ({ children }) {
     setMessages,
     setConversationsInfo,
     conversationsInfo,
-    setSelectedService
-  } = useContext(Appstate)
+    setSelectedService,
+  } = useContext(Appstate);
 
-  const [connection, setConnection] = useState(false)
+  const [connection, setConnection] = useState(false);
 
   useEffect(() => {
-    setFriends([])
+    setFriends([]);
     updateFriendsAndStatus({
       conversationsInfo,
       setFriends,
       setPresenceInfo,
-      user
-    })
-  }, [conversationsInfo])
+      user,
+    });
+  }, [conversationsInfo]);
 
   useEffect(() => {
     if (isSignedIn && isLoaded && connection) {
-      includeUser({ user })
+      includeUser({ user });
     }
-  }, [isLoaded, isSignedIn, connection])
+  }, [isLoaded, isSignedIn, connection]);
 
   //setting connection
   useEffect(() => {
     if (!isSignedIn) {
-      goOffline(realtimeDB)
-      setConnection(false)
+      goOffline(realtimeDB);
+      setConnection(false);
     } else {
-      goOnline(realtimeDB)
-      setConnection(true)
+      goOnline(realtimeDB);
+      setConnection(true);
     }
-  }, [isSignedIn])
+  }, [isSignedIn]);
 
   useEffect(() => {
     if (!isLoaded) {
-      return
+      return;
     }
 
     // setting the listener for message change in each conversation document
 
-    setFriends([])
-    const unsub_subcollection_list = []
-    setPresenceInfo([])
+    setFriends([]);
+    const unsub_subcollection_list = [];
+    setPresenceInfo([]);
 
     const cquery = query(
       collection(firestoreDB, `users/${user.id}/conversations`)
-    )
+    );
 
-    const unSubMessages = onSnapshot(cquery, async snapshots => {
-      const conversations_info_list = []
+    const unSubMessages = onSnapshot(cquery, async (snapshots) => {
+      const conversations_info_list = [];
       // console.log(snapshots.docs)
       for (const snapshot of snapshots.docs) {
-        const conversation_info = snapshot.data()
-        conversations_info_list.push(conversation_info)
+        const conversation_info = snapshot.data();
+        if (conversation_info.type === "group") continue;
+        conversations_info_list.push(conversation_info);
 
         const unsub_subcollection = await setUpSubCollectionListener({
           conversation_info,
           user,
-          setMessages
-        })
-        unsub_subcollection_list.push(unsub_subcollection)
+          setMessages,
+        });
+        unsub_subcollection_list.push(unsub_subcollection);
       }
-      setConversationsInfo(conversations_info_list)
-    })
+      setConversationsInfo(conversations_info_list);
+    });
 
     return () => {
       // unsub()
-      unSubMessages()
-      unsub_subcollection_list.forEach(unsub => unsub())
-    }
-  }, [isLoaded])
+      unSubMessages();
+      unsub_subcollection_list.forEach((unsub) => unsub());
+    };
+  }, [isLoaded]);
 
   // socket connection for managing presence status
   useEffect(() => {
@@ -105,38 +106,37 @@ export default function AppWrapper ({ children }) {
         ref(realtimeDB, `users/${user?.id || localStorage.getItem(`user_id`)}`)
       ).update({
         online: false,
-        last_seen: new Date().toString()
-      })
+        last_seen: new Date().toString(),
+      });
 
     isLoaded &&
-      document.addEventListener('visibilitychange', () =>
+      document.addEventListener("visibilitychange", () =>
         handleVisibileStatus(user)
-      )
+      );
 
-    
     return () => {
-      document.removeEventListener('visibilitychange', () =>
+      document.removeEventListener("visibilitychange", () =>
         handleVisibileStatus(user)
-      )
-    }
-  }, [isLoaded])
+      );
+    };
+  }, [isLoaded]);
 
   useEffect(() => {
-    const appPath = location.pathname
-    const pathArray = appPath.split('/')
-    serviceList.forEach(service => {
+    const appPath = location.pathname;
+    const pathArray = appPath.split("/");
+    serviceList.forEach((service) => {
       if (pathArray.includes(service.service)) {
-        setSelectedService(service.to)
+        setSelectedService(service.to);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
-    <div className='h-full'>
-      <div className='flex h-full'>
+    <div className="h-full">
+      <div className="flex h-full">
         <Sidenav className={`h-full w-[80px]`} />
         {children}
       </div>
     </div>
-  )
+  );
 }

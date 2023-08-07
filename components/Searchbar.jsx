@@ -16,6 +16,7 @@ export default function Searchbar ({
           placeholder={placeholder}
           onChange={onChange}
           value={value}
+          autoFocus
         />
         <img
           src='https://cdn-icons-png.flaticon.com/512/54/54481.png'

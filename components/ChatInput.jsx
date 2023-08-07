@@ -8,6 +8,7 @@ import { ref, uploadBytes } from 'firebase/storage'
 import Picker from '@emoji-mart/react'
 import { cloneDeep } from 'lodash'
 import { abortImage } from '@/functions/abortImage'
+import { uploadImage } from '@/functions/uploadImage'
 
 function ChatInput () {
   const { user } = useUser()
@@ -27,7 +28,7 @@ function ChatInput () {
   })
 
   const handleFileChange = e => {
-    console.log(e.target.files[0])
+
     const fileReader = new FileReader()
     fileReader.onloadend = () => {
       setImageInfo({ url: fileReader.result, info: e.target.files[0] })
@@ -155,10 +156,9 @@ function ChatInput () {
       refMessage
     }
 
+    await uploadImage(imageInfo.info,imageName)
 
-    const contentRef = ref(contentDB, imageName)
 
-    imageInfo.info && (await uploadBytes(contentRef, imageInfo.info))
     ;(userInput || imageInfo.info) &&
       (await shareMessage({ conversation_id, message }))
   }
