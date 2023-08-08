@@ -5,8 +5,10 @@ import { Appstate } from "@/hooks/context";
 import ChatBoxHeader from "@/components/ChatBoxHeader";
 import MessagesList from "@/components/MessagesList";
 import ChatInput from "@/components/ChatInput";
+import { motion } from "framer-motion";
+import RightSidebar from "@/components/RightSidebar";
 
-function page({ params }) {
+function Page({ params }) {
   const {
     groups,
     selectedChatUser,
@@ -17,6 +19,7 @@ function page({ params }) {
   } = useContext(Appstate);
   const full_id = `group_${params.groupid}`;
   const [showChatPage, setShowChatPage] = useState(true);
+  const [rightSidebar, setRightSidebar] = useState(false);
 
   useEffect(() => {
     if (selectedGroup?.id !== full_id) {
@@ -31,25 +34,32 @@ function page({ params }) {
   }, [groups]);
 
   return (
-    <div className="w-full h-full">
+    <>
       {showChatPage ? (
-        <>
-          <ChatBoxHeader
-            address={selectedGroup?.img}
-            name={selectedGroup?.name}
-            participants={selectedGroup?.participants}
-            type='group'
-          />
-          <MessagesList list={messages[selectedGroup?.id]}/>
-          <ChatInput type='group' />
-        </>
+        <div className="w-full h-full flex justify-between items-center">
+          <div
+            className={`h-full  transition-all duration-500`}
+            style={{ width: rightSidebar ? `65%` : `100%` }}
+          >
+            <ChatBoxHeader
+              address={selectedGroup?.img}
+              name={selectedGroup?.name}
+              participants={selectedGroup?.participants}
+              type="group"
+              onClick={() => setRightSidebar((prev) => !prev)}
+            />
+            <MessagesList list={messages[selectedGroup?.id]} />
+            <ChatInput type="group" width={rightSidebar ? `80%` : ``} />
+          </div>
+          <RightSidebar open={rightSidebar} />
+        </div>
       ) : (
         <div className="w-full h-full flex justify-center items-center text-3xl text-red-500 font-bold">
           {/* User doesnot exist */}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
-export default page;
+export default Page;

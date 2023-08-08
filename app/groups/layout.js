@@ -327,7 +327,7 @@ export default function RootLayout({ children }) {
                     selectedGroup?.id === group.id
                   }
                   OverlayComponent={GroupOverlayComponent}
-                  include={{ lastMessage: true, lastMessageTime: true }}
+                  include={{ lastMessage: true, lastMessageTime: true }} 
                 />
               </Link>
             );

@@ -17,19 +17,17 @@ function MessagesList({ list }) {
     setReferenceMessage,
   } = useContext(Appstate);
 
+  const messageContainerRef = useRef(null);
+
   useEffect(() => {
-    messagesListRef.current.scrollTo({
+    messageContainerRef.current.scrollTo({
       behavior: "smooth",
       top: messagesListRef.current.scrollHeight,
     });
   }, [messages, selectedChatUser]);
 
-  // useEffect(() => {
-  //   messagesListRef.current.style.height = `${window.innerHeight - 128}px`
-  // }, [])
-
   useEffect(() => {
-    const messageList = document.getElementById("messageList");
+    const messageList = document.getElementById("messageContainer");
     messageList.scrollTo({
       top: messageList.scrollHeight,
       behavior: "smooth",
@@ -40,16 +38,17 @@ function MessagesList({ list }) {
 
   return (
     <div
-      className="overflow-y-scroll -z-10 h-[calc(100%-128px)]"
-      // style={{ height: `${0}px` }}
-      ref={messagesListRef}
-      id="messageList"
+      className="flex flex-col items-center justify-between overflow-y-scroll -z-10 h-[calc(100%-128px)]"
+      id="messageContainer"
+      ref={messageContainerRef}
     >
-      {(list || messages[selectedChatUser.current_User_Id])?.map(
-        (message, index) => {
-          return <ChatMessage message={message} key={index} />;
-        }
-      )}
+      <div className="w-full" ref={messagesListRef} id="messageList">
+        {(list || messages[selectedChatUser.current_User_Id])?.map(
+          (message, index) => {
+            return <ChatMessage message={message} key={index} />;
+          }
+        )}
+      </div>
       <div className="w-[98%] mx-auto">
         <RefMessage
           refMessageInfo={refMessageInfo}

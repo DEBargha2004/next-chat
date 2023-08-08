@@ -10,7 +10,7 @@ import { cloneDeep } from "lodash";
 import { abortImage } from "@/functions/abortImage";
 import { uploadImage } from "@/functions/uploadImage";
 
-function ChatInput({ type }) {
+function ChatInput({ type, width }) {
   const { user } = useUser();
   const {
     selectedChatUser,
@@ -253,8 +253,9 @@ function ChatInput({ type }) {
           value={userInput}
           ref={userInputRef}
           id=""
-          className="h-auto py-3 px-3 w-[85%] outline-none bg-gray-100 rounded-full text-lg text-slate-600"
+          className="h-auto py-3 px-3 outline-none bg-gray-100 rounded-full text-lg text-slate-600 transition-all duration-500"
           onChange={(e) => setUserInput(e.target.value)}
+          style={{ width: width ? width : `85%` }}
         />
         <button
           type="submit"

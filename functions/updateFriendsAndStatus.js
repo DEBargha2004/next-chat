@@ -1,7 +1,7 @@
 import { UserInfoWithConversations } from "./userInfoWithConversations";
 import { firestoreDB, realtimeDB } from "@/firebase.config";
 import { onValue, ref } from "firebase/database";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc,getDocs } from "firebase/firestore";
 import _ from "lodash";
 
 export async function updateFriendsAndStatus({
@@ -17,10 +17,18 @@ export async function updateFriendsAndStatus({
 
   for (const conversation_info of conversationsInfo) {
     if (conversation_info.type === "group") {
-      const group_info = await getDoc(
+      let group_info = await getDoc(
         doc(firestoreDB, `groups/group_${conversation_info.conversation_id}`)
       );
-      groups_info.push(group_info.data());
+      group_info = group_info.data()
+      const local_storage = []
+      const participants = await getDocs(collection(firestoreDB,`groups/${group_info.id}/participants`))
+      participants.docs.forEach(participant => {
+        local_storage.push(participant.data())
+      })
+      group_info.participants = local_storage
+      console.log(group_info);
+      groups_info.push(group_info);
       continue;
     }
     const participants = conversation_info.participants;

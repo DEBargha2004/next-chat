@@ -3,7 +3,7 @@ import { Appstate } from "@/hooks/context";
 import Avatar from "./Avatar";
 import { generateTimeStamp } from "../functions/generateTime";
 
-function ChatBoxHeader({ address, name, participants, type }) {
+function ChatBoxHeader({ address, name, participants, type, onClick }) {
   const { selectedChatUser, presenceInfo, selectedGroup } =
     useContext(Appstate);
 
@@ -25,11 +25,16 @@ function ChatBoxHeader({ address, name, participants, type }) {
     }
   }, []);
 
+  console.log(participants);
+
   return ifId_exist ? (
-    <div className="w-full flex justify-between px-4 py-2 shadow-md shadow-[#00000017]">
+    <div className="w-full flex justify-between px-4 py-2 shadow-md shadow-[#00000017] truncate">
       <div className="flex justify-between">
         <Avatar url={selectedChatUser?.current_User_Image} address={address} />
-        <div className="h-full flex flex-col items-start justify-center ml-4">
+        <div
+          className="h-full flex flex-col items-start justify-center ml-4"
+          onClick={onClick}
+        >
           <p>{name || selectedChatUser?.current_User_Name}</p>
           <p className={`text-slate-500 text-sm`}>
             {user_presence_info.online
@@ -37,6 +42,21 @@ function ChatBoxHeader({ address, name, participants, type }) {
                 ? "😴"
                 : "online"
               : user_presence_info?.last_Seen}
+          </p>
+          <p>
+            {type === "group" ? (
+              <div className="flex items-center">
+                {participants?.map((participant) => (
+                  <p
+                    key={participant.user_id}
+                    className="text-xs w-[60px] truncate mr-1 text-slate-600"
+                  >
+                    {participant.user_name}
+                    {}
+                  </p>
+                ))}
+              </div>
+            ) : null}
           </p>
         </div>
       </div>

@@ -10,7 +10,7 @@ export const serviceList = [
     service: 'groups'
   },
   {
-    url: 'https://cdn-icons-png.flaticon.com/512/5977/5977971.png',
+    url: 'https://cdn-icons-png.flaticon.com/512/1946/1946488.png',
     to: '/posts',
     service: 'posts'
   },
