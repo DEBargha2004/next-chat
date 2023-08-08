@@ -3,7 +3,7 @@
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import { serviceList } from "@/constants/serviceList";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Searchbar from "@/components/Searchbar";
 import { handleSearchUser } from "@/functions/handleSearchUser";
 import { useUser } from "@clerk/nextjs";
@@ -15,6 +15,8 @@ import { v4 } from "uuid";
 import { uploadImage } from "@/functions/uploadImage";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { firestoreDB } from "@/firebase.config";
+import { Appstate } from "@/hooks/context";
+import Link from "next/link";
 
 const GroupInfo = ({ groupInfo, setGroupInfo, list }) => {
   const handleGroupImage = (e) => {
@@ -86,6 +88,7 @@ const SelectParticipants = ({ error, children, query, onChange, list }) => {
 export default function RootLayout({ children }) {
   const chat = serviceList.find((service) => service.service === "chat");
 
+  const { groups, setSelectedGroup, selectedGroup } = useContext(Appstate);
   const { user } = useUser();
   let isProcessing = false;
   const [processing, setProcessing] = useState(false);
@@ -176,6 +179,7 @@ export default function RootLayout({ children }) {
           conversation_id: conversation_id,
           createdAt: timeStamp,
           type: "group",
+          participantsCount: participants.length,
         };
 
         await setDoc(
@@ -289,6 +293,12 @@ export default function RootLayout({ children }) {
     );
   };
 
+  const GroupOverlayComponent = () => {
+    return (
+      <div className="-z-10 bg-slate-200 w-full h-full absolute left-0 top-0"></div>
+    );
+  };
+
   return (
     <>
       <Sidebar className={`w-[30%] border-r-[1px] border-slate-400`}>
@@ -304,6 +314,25 @@ export default function RootLayout({ children }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search for a group`}
         />
+        <div>
+          {groups.map((group) => {
+            return (
+              <Link key={group.id} href={`/groups/${group.id.replace('group_','')}`}>
+                <Userbox
+                  address={group.img}
+                  item={group}
+                  key={group.id}
+                  onClick={() => setSelectedGroup(group)}
+                  selected={
+                    selectedGroup?.id === group.id
+                  }
+                  OverlayComponent={GroupOverlayComponent}
+                  include={{ lastMessage: true, lastMessageTime: true }}
+                />
+              </Link>
+            );
+          })}
+        </div>
       </Sidebar>
       <div className="w-[70%] h-full">{children}</div>
       <dialog
@@ -352,7 +381,9 @@ export default function RootLayout({ children }) {
                     setDialogState("select");
                   })();
             }}
-            className="px-4 py-2 bg-red-500 w-[45%] text-white rounded-lg"
+            className={`px-4 py-2 bg-red-500 w-[45%] text-white rounded-lg ${
+              processing ? `grayscale cursor-not-allowed` : ``
+            }`}
           >
             {dialogState === "select" ? "Cancel" : "Edit"}
           </button>

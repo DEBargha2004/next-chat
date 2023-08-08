@@ -1,20 +1,26 @@
 import Image from "next/image";
 import man from "../public/man.jpeg";
+import { useEffect, useMemo, useState } from "react";
+import { getImage } from "@/functions/getImage";
 
-const icons =  {group : `https://cdn-icons-png.flaticon.com/512/33/33308.png`}
+const icons = { group: `https://cdn-icons-png.flaticon.com/512/33/33308.png` };
 
-function Avatar({ url, online, className,group }) {
+function Avatar({ url, online, className, group, address }) {
+  const [processedUrl, setProcessedUrl] = useState("");
 
-
+  useEffect(() => {
+    address && getImage(address).then((url) => setProcessedUrl(url));
+  }, [address]);
   const noProfile = () => {
-    if(group){
-      return icons.group
+    if (group) {
+      return icons.group;
     }
-  }
+  };
   return (
     <div className="flex relative">
       <img
-        src={url ? url : noProfile()}
+        src={processedUrl ? processedUrl : url ? url : noProfile()}
+        // src={url ? url : noProfile()}
         className={`h-12 w-12 object-cover rounded-full ${className}`}
         alt=""
       />

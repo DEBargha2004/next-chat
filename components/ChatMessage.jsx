@@ -20,6 +20,8 @@ function ChatMessage ({ message }) {
     }
   }, [selectedChatUser, isLoaded])
 
+  console.log(message);
+
   return (
     <div
       className={`w-full flex ${

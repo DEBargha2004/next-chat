@@ -18,6 +18,7 @@ function Userbox({
   selected,
   disableHoverEffect,
   OverlayComponent,
+  address
 }) {
   const { user } = useUser();
   const { setSelectedChatUser, selectedChatUser, presenceInfo, messages } =
@@ -40,7 +41,7 @@ function Userbox({
   }, [messages[item.user_id]]);
 
   const lastMessage = useMemo(() => {
-    const messages_info = messages[item.user_id];
+    const messages_info = messages[item.user_id || `group_${item.id}`];
     const last_message_info = _.maxBy(messages_info, (item) =>
       _.get(item, "message_createdAt.seconds")
     );
@@ -81,10 +82,10 @@ function Userbox({
       onClick={onClick}
     >
       {selected ? <OverlayComponent /> : null}
-      <Avatar url={item.user_img} online={user_presense_info?.online} />
+      <Avatar url={item.user_img} online={user_presense_info?.online} address={address} />
       <div className="h-10 ml-4 flex flex-col justify-center w-[75%]">
         <div className="flex justify-between items-center">
-          <h1 className="flex items-center font-semibold">{item.user_name}</h1>
+          <h1 className="flex items-center font-semibold">{item.name || item.user_name}</h1>
           {/*based on condition*/}
           <p className="text-sm">
             {lastMessage && include?.lastMessageTime

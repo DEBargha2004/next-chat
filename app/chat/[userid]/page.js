@@ -34,7 +34,7 @@ export default function page ({ params }) {
       {showChatPage ? (
         <>
           <ChatBoxHeader />
-          <MessagesList  />
+          <MessagesList />
           <ChatInput />
         </>
       ) : (

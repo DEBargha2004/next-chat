@@ -28,17 +28,20 @@ export default function AppWrapper({ children }) {
     setConversationsInfo,
     conversationsInfo,
     setSelectedService,
+    setGroups
   } = useContext(Appstate);
 
   const [connection, setConnection] = useState(false);
 
   useEffect(() => {
     setFriends([]);
+    setGroups([])
     updateFriendsAndStatus({
       conversationsInfo,
       setFriends,
       setPresenceInfo,
       user,
+      setGroups
     });
   }, [conversationsInfo]);
 
@@ -67,6 +70,7 @@ export default function AppWrapper({ children }) {
     // setting the listener for message change in each conversation document
 
     setFriends([]);
+    setGroups([])
     const unsub_subcollection_list = [];
     setPresenceInfo([]);
 
@@ -79,13 +83,14 @@ export default function AppWrapper({ children }) {
       // console.log(snapshots.docs)
       for (const snapshot of snapshots.docs) {
         const conversation_info = snapshot.data();
-        if (conversation_info.type === "group") continue;
+        // if (conversation_info.type === "group") continue;
         conversations_info_list.push(conversation_info);
 
         const unsub_subcollection = await setUpSubCollectionListener({
           conversation_info,
           user,
           setMessages,
+          setGroups
         });
         unsub_subcollection_list.push(unsub_subcollection);
       }
@@ -121,6 +126,7 @@ export default function AppWrapper({ children }) {
     };
   }, [isLoaded]);
 
+  // changing service selected on path change
   useEffect(() => {
     const appPath = location.pathname;
     const pathArray = appPath.split("/");

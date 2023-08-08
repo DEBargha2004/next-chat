@@ -4,7 +4,7 @@ import { contentDB, firestoreDB } from '../firebase.config'
 import { getDownloadURL, ref } from 'firebase/storage'
 import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
-import { doc, updateDoc } from 'firebase/firestore'
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore'
 import { serverTimestamp } from 'firebase/firestore'
 import messageStatus from '@/functions/messageStaus'
 import RefMessage from './RefMessage'
@@ -37,7 +37,8 @@ function ChatMessageText ({ message }) {
         ),
         {
           message_read: true,
-          message_readAt: serverTimestamp()
+          message_readAt: serverTimestamp(),
+          read_by: arrayUnion(user.id)
         }
       )
     }
