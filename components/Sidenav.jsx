@@ -8,7 +8,7 @@ import { serviceList } from '@/constants/serviceList'
 function Sidenav ({ className }) {
   const { selectedService } = useContext(Appstate)
   return (
-    <div
+    <nav
       className={`${className} flex items-end pb-10 border-r-[1px] border-slate-400`}
     >
       <div className='w-full h-[70%] flex flex-col justify-between items-center'>
@@ -31,7 +31,7 @@ function Sidenav ({ className }) {
           <UserButton />
         </div>
       </div>
-    </div>
+    </nav>
   )
 }
 

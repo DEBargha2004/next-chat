@@ -52,7 +52,7 @@ function ChatInput({ type, width }) {
       // Do Something
     } else {
       const sender_id = user.id;
-      const receiver_id = selectedChatUser.current_User_Id;
+      const receiver_id = selectedChatUser.user_id;
 
       const createdAt = serverTimestamp();
 
@@ -125,7 +125,7 @@ function ChatInput({ type, width }) {
     }
 
     const sender_id = user.id;
-    const receiver_id = selectedChatUser.current_User_Id;
+    const receiver_id = selectedChatUser.user_id;
     const message_data = {
       text: userInput,
       image: imageInfo.info ? imageName : null,

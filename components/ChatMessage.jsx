@@ -4,7 +4,7 @@ import ChatMessageText from './ChatMessageText'
 import { useContext, useMemo, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 
-function ChatMessage ({ message }) {
+function ChatMessage ({ message,database }) {
   const { friends, selectedChatUser,setReferenceMessage,referenceMessage } = useContext(Appstate)
   const { user, isLoaded } = useUser()
   const [isHovering, setIsHovering] = useState(false)
@@ -13,7 +13,7 @@ function ChatMessage ({ message }) {
     if (message.sender_id === user?.id) {
       return user.imageUrl
     } else {
-      const friend_info = friends.find(
+      const friend_info = database.find(
         friend => friend.user_id === message.sender_id
       )
       return friend_info?.user_img

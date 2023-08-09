@@ -5,9 +5,18 @@ import Avatar from "./Avatar";
 import RightSidebarCompWrapper from "./RightSidebarCompWrapper";
 import { format } from "date-fns";
 import Userbox from "./Userbox";
+import Link from "next/link";
+import { selectUser } from "@/functions/selectUser";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { deleteDoc } from "firebase/firestore";
+import { firestoreDB } from "@/firebase.config";
 
-function RightSidebar({ open }) {
-  const { selectedGroup } = useContext(Appstate);
+function RightSidebar({ open, type }) {
+  const { selectedGroup, setSelectedChatUser, setSelectedService } =
+    useContext(Appstate);
+  const { user } = useUser();
+  const router = useRouter();
   const [groupImgUrl, setGroupImgUrl] = useState("");
 
   const ownerBadge = () => {
@@ -27,10 +36,42 @@ function RightSidebar({ open }) {
     );
   };
 
+  const handleSelectUser = (participant) => {
+    const linkRef = `/chat/${participant.user_id.replace("user_", "")}`;
+    if (user?.id === participant.user_id) {
+      return;
+    } else {
+      selectUser({ setSelectedChatUser, item: participant });
+      router.push(linkRef);
+      setSelectedService("/chat");
+    }
+  };
+
+  const leaveGroup = async () => {
+    const user_id = user?.id;
+    const isOwner = Boolean(selectedGroup?.user_id);
+    const isAdmin = selectedGroup?.admin.includes(user_id);
+    const isParticipant = selectedGroup?.participants?.find(
+      (participant) => participant.user_id === user_id
+    );
+
+    isParticipant &&
+      (await deleteDoc(
+        doc(
+          firestoreDB,
+          `groups/group_${selectedGroup?.conversation_id}/participants/${user_id}`
+        )
+      ));
+    // deleting owner left from groups/group_id
+    // deleting admin left from groups/group_id
+    // removing conversationDoc left from users/user_id/conversations/conversation_id
+  };
+
   return (
     <div
-      className={`h-full overflow-y-scroll transition-all duration-500 bg-white`}
-      style={{ width: open ? `35%` : `0` }}
+      className={`h-full overflow-y-scroll transition-all duration-500 bg-white shrink-0`}
+      // style={{ width: open ? `35%` : `0` }}
+      style={{ width: `35%` }}
     >
       <RightSidebarCompWrapper>
         <div className="w-full flex flex-col items-center justify-between">
@@ -50,8 +91,8 @@ function RightSidebar({ open }) {
         <div className="flex flex-col items-start justify-between">
           <p className="text-lg mb-2">{selectedGroup?.description}</p>
           <p className="text-sm text-slate-500 font-medium">
-            Created by {selectedGroup?.owner.user_name},{` `}
-            {format(selectedGroup?.createdAt.seconds || 0, "dd/MM/yy")}
+            Created by {selectedGroup?.owner?.user_name},{` `}
+            {format(selectedGroup?.createdAt?.seconds || 0, "dd/MM/yy")}
           </p>
         </div>
       </RightSidebarCompWrapper>
@@ -61,22 +102,43 @@ function RightSidebar({ open }) {
             {selectedGroup?.participantsCount} participants
           </div>
           <div className="pb-4">
-            {selectedGroup?.participants.map((participant) => (
-              <Userbox
-                key={participant.user_id}
-                item={participant}
-                badges={{
-                  owner:
-                    selectedGroup.owner.user_id === participant.user_id
-                      ? ownerBadge()
+            {selectedGroup?.participants?.map((participant) => {
+              const linkRef = participant.user_id.replace("user_", "");
+              return (
+                <Userbox
+                  key={participant.user_id}
+                  item={participant}
+                  onClick={() =>
+                    participant.user_id === user?.id
+                      ? null
+                      : handleSelectUser(participant)
+                  }
+                  badges={{
+                    owner:
+                      selectedGroup?.owner?.user_id === participant.user_id
+                        ? ownerBadge()
+                        : null,
+                    admin: selectedGroup?.admin?.includes(participant.user_id)
+                      ? adminBadge()
                       : null,
-                  admin: selectedGroup.admin.includes(participant.user_id)
-                    ? adminBadge()
-                    : null,
-                }}
-              />
-            ))}
+                  }}
+                  disableHoverEffect={
+                    participant.user_id === user?.id ? true : false
+                  }
+                />
+              );
+            })}
           </div>
+        </div>
+      </RightSidebarCompWrapper>
+      <RightSidebarCompWrapper>
+        <div className="flex justify-center">
+          <button
+            className="bg-red-500 text-white w-[70%] transition-all py-1 rounded uppercase hover:bg-red-700 "
+            onClick={leaveGroup}
+          >
+            Leave
+          </button>
         </div>
       </RightSidebarCompWrapper>
     </div>

@@ -36,9 +36,9 @@ function Page({ params }) {
   return (
     <>
       {showChatPage ? (
-        <div className="w-full h-full flex justify-between items-center">
+        <div className="w-full h-full flex justify-between items-center overflow-hidden">
           <div
-            className={`h-full  transition-all duration-500`}
+            className={`h-full  transition-all duration-500 shrink-0`}
             style={{ width: rightSidebar ? `65%` : `100%` }}
           >
             <ChatBoxHeader
@@ -48,10 +48,13 @@ function Page({ params }) {
               type="group"
               onClick={() => setRightSidebar((prev) => !prev)}
             />
-            <MessagesList list={messages[selectedGroup?.id]} />
+            <MessagesList
+              list={messages[selectedGroup?.id]}
+              database={selectedGroup?.participants}
+            />
             <ChatInput type="group" width={rightSidebar ? `80%` : ``} />
           </div>
-          <RightSidebar open={rightSidebar} />
+          <RightSidebar open={rightSidebar} type="group" />
         </div>
       ) : (
         <div className="w-full h-full flex justify-center items-center text-3xl text-red-500 font-bold">

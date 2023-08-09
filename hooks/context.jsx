@@ -9,11 +9,11 @@ export function GlobalAppStateProvider ({ children }) {
   const { user } = useUser()
 
   const [selectedChatUser, setSelectedChatUser] = useState({
-    current_User_Name: '',
-    current_User_Image: '',
+    user_name: '',
+    user_img: '',
     last_Seen: '',
     online: false,
-    current_User_Id: null
+    user_id: null
   })
 
   const [selectedGroup,setSelectedGroup] = useState(null)
@@ -53,18 +53,18 @@ export function GlobalAppStateProvider ({ children }) {
   useEffect(() => {
     setSelectedChatUser(prev => ({
       ...prev,
-      current_User_Name: '',
-      current_User_Image: '',
+      user_name: '',
+      user_img: '',
       last_Seen: '',
       online: false,
-      current_User_Id: null
+      user_id: null
     }))
     setSelectedGroup({})
   }, [selectedService])
 
   useEffect(() => {
     setReferenceMessage(null)
-  }, [selectedChatUser?.current_User_Id])
+  }, [selectedChatUser?.user_id])
 
   return (
     <Appstate.Provider

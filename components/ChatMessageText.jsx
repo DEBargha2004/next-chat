@@ -66,7 +66,7 @@ function ChatMessageText ({ message }) {
 
 const handleImageLoad = () => {
   console.log('image loaded')
-  const messageList = document.getElementById('messageList')
+  const messageList = document.getElementById('messageContainer')
   messageList.scrollTo({
     behavior: 'smooth',
     top: messageList.scrollHeight

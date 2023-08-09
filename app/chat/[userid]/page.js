@@ -14,7 +14,7 @@ export default function page ({ params }) {
   const [showChatPage, setShowChatPage] = useState(true)
 
   useEffect(() => {
-    if (selectedChatUser.current_User_Id !== full_userid) {
+    if (selectedChatUser.user_id !== full_userid) {
       const user_tobe_selected = friends.find(
         friend => friend.user_id === full_userid
       )
@@ -33,8 +33,8 @@ export default function page ({ params }) {
     <div className='w-full h-full'>
       {showChatPage ? (
         <>
-          <ChatBoxHeader />
-          <MessagesList />
+          <ChatBoxHeader type={`one-one`} />
+          <MessagesList database={friends} />
           <ChatInput />
         </>
       ) : (

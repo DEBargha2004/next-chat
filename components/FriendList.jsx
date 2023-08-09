@@ -87,7 +87,7 @@ function FriendList({ UserboxComponent }) {
               item={item}
               include={{ lastMessage: true, lastMessageTime: true }}
               onClick={() => selectUser({ setSelectedChatUser, item: item })}
-              selected={selectedChatUser.current_User_Id === item.user_id}
+              selected={selectedChatUser.user_id === item.user_id}
               OverlayComponent={OverlayComponent}
             />
           </Link>

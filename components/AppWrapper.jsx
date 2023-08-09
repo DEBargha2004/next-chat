@@ -139,7 +139,7 @@ export default function AppWrapper({ children }) {
 
   return (
     <div className="h-full">
-      <div className="flex h-full">
+      <div className="flex h-full overflow-hidden">
         <Sidenav className={`h-full w-[80px]`} />
         {children}
       </div>

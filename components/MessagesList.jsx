@@ -6,7 +6,7 @@ import ChatMessage from "./ChatMessage";
 import RefMessage from "./RefMessage";
 import ChatInputImage from "./ChatInputImage";
 
-function MessagesList({ list }) {
+function MessagesList({ list,database }) {
   const messagesListRef = useRef(null);
   const {
     messages,
@@ -43,9 +43,9 @@ function MessagesList({ list }) {
       ref={messageContainerRef}
     >
       <div className="w-full" ref={messagesListRef} id="messageList">
-        {(list || messages[selectedChatUser.current_User_Id])?.map(
+        {(list || messages[selectedChatUser.user_id])?.map(
           (message, index) => {
-            return <ChatMessage message={message} key={index} />;
+            return <ChatMessage message={message} key={index} database={database} />;
           }
         )}
       </div>
