@@ -2,6 +2,7 @@ import { Appstate } from '@/hooks/context'
 import Link from 'next/link'
 import { useContext, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 function ServiceComponent ({ url, index, to }) {
   const { selectedService, setSelectedService } = useContext(Appstate)
@@ -15,7 +16,9 @@ function ServiceComponent ({ url, index, to }) {
   return (
     <Link href={to ? to : ''}>
       <div
-        className={`p-2 rounded-md transition-all hover:bg-slate-200 relative flex justify-between items-center ${to.includes(selectedService) ? `bg-slate-200` : `` }`}
+        className={`p-2 rounded-md transition-all hover:bg-slate-200 relative flex justify-between items-center ${
+          to.includes(selectedService) ? `bg-slate-200` : ``
+        }`}
         onClick={() => setSelectedService(to)}
       >
         {to.includes(selectedService) ? (
@@ -25,7 +28,7 @@ function ServiceComponent ({ url, index, to }) {
             className=' w-1 bg-cyan-500 rounded-lg transition-all duration-75 ease-linear absolute -left-[1px]'
           ></motion.div>
         ) : null}
-        <img src={url} className='h-7' alt='' />
+        <Image height={28} width={28} src={url} className='h-7' alt='' />
       </div>
     </Link>
   )

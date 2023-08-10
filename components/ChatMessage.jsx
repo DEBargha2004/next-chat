@@ -3,6 +3,7 @@ import Avatar from './Avatar'
 import ChatMessageText from './ChatMessageText'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { Appstate } from '@/hooks/context'
+import Image from 'next/image'
 
 function ChatMessage ({ message, database }) {
   const { friends, selectedChatUser, setReferenceMessage, referenceMessage } =
@@ -65,7 +66,9 @@ function ChatMessage ({ message, database }) {
         </div>
         <ChatMessageText message={messageWithRefData} />
         {isHovering ? (
-          <img
+          <Image
+            height={24}
+            width={24}
             src='https://cdn-icons-png.flaticon.com/512/3388/3388597.png'
             className='h-6 ml-4 mr-4 p-1 cursor-pointer'
             alt=''

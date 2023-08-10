@@ -1,3 +1,6 @@
+import Image from "next/image"
+
+
 function RefMessage ({ refMessageInfo,onClick,className }) {
 
 
@@ -14,7 +17,9 @@ function RefMessage ({ refMessageInfo,onClick,className }) {
         </h1>
         <div className='flex items-center'>
           {refMessageInfo?.message_type.image ? (
-            <img
+            <Image
+            width={13}
+            height={13}
               src='https://cdn-icons-png.flaticon.com/512/16/16410.png'
               className='h-[13px] opacity-60 mr-1'
               alt=''

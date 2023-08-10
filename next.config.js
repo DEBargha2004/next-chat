@@ -4,9 +4,10 @@ const nextConfig = {
     domains: [
       'images.unsplash.com',
       'img.clerk.com',
-      'firebasestorage.googleapis.com'
+      'firebasestorage.googleapis.com',
+      'cdn-icons-png.flaticon.com'
     ],
-    minimumCacheTTL : 60
+    minimumCacheTTL: 60
   }
 }
 

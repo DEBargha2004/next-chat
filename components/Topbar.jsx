@@ -2,14 +2,17 @@ import Link from 'next/link'
 import messenger from '../public/messenger.png'
 import { useContext } from 'react'
 import { Appstate } from '@/hooks/context'
+import Image from 'next/image'
 
-export default function Topbar ({linkedElement : {url,to,service}}) {
+export default function Topbar ({ linkedElement: { url, to, service } }) {
   const { setSelectedService } = useContext(Appstate)
   return (
     <nav className='w-full flex justify-center items-center'>
       <div className='w-[90%] h-8 mt-2 flex items-center justify-between'>
         <Link href={`/`}>
-          <img
+          <Image
+            width={32}
+            height={32}
             src={messenger.src}
             className='w-8 p-1'
             alt=''
@@ -17,11 +20,13 @@ export default function Topbar ({linkedElement : {url,to,service}}) {
           />
         </Link>
         <Link href={to}>
-          <img
+          <Image
+            width={32}
+            height={32}
             src={url}
             className='w-8 p-1 rounded-md transition-all hover:bg-slate-100'
             alt=''
-            onClick={()=>setSelectedService(service)}
+            onClick={() => setSelectedService(service)}
           />
         </Link>
       </div>

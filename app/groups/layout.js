@@ -17,6 +17,7 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { firestoreDB } from "@/firebase.config";
 import { Appstate } from "@/hooks/context";
 import Link from "next/link";
+import Image from "next/image";
 
 const GroupInfo = ({ groupInfo, setGroupInfo, list }) => {
   const handleGroupImage = (e) => {
@@ -65,7 +66,7 @@ const ParticipantsList = ({ list, Component, componentStyle }) => {
           <Component url={user.user_img} className={componentStyle} />
         ) : (
           <div className="w-11 mr-3" key={index}>
-            <img src={user.user_img} className="w-10 rounded-full" />
+            <Image src={user.user_img} className="w-10 rounded-full" />
             <h1 className="text-xs truncate">{user.user_name}</h1>
           </div>
         );
@@ -285,7 +286,7 @@ export default function RootLayout({ children }) {
   const OverlayComponent = () => {
     return (
       <div className="w-full h-full absolute top-0 left-0 -z-10 bg-green-300">
-        <img
+        <Image
           src={tick.src}
           className="w-7 z-10 absolute right-4 top-[50%] -translate-y-[50%]"
         />

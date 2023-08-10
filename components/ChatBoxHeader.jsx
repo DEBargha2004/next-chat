@@ -42,7 +42,7 @@ function ChatBoxHeader({ address, name, participants, type, onClick }) {
                 : "online"
               : user_presence_info?.last_Seen}
           </p>
-          <p>
+          <div>
             {type === "group" ? (
               <div className="flex items-center">
                 {participants?.map((participant) => (
@@ -56,7 +56,7 @@ function ChatBoxHeader({ address, name, participants, type, onClick }) {
                 ))}
               </div>
             ) : null}
-          </p>
+          </div>
         </div>
       </div>
     </div>

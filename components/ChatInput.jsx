@@ -9,6 +9,7 @@ import Picker from '@emoji-mart/react'
 import { cloneDeep } from 'lodash'
 import { abortImage } from '@/functions/abortImage'
 import { uploadImage } from '@/functions/uploadImage'
+import Image from 'next/image'
 
 function ChatInput ({ type, width }) {
   const { user } = useUser()
@@ -201,7 +202,9 @@ function ChatInput ({ type, width }) {
         />
         <label htmlFor='imageInput'>
           <div className='p-1 hover:bg-slate-200 transition-all rounded-md'>
-            <img
+            <Image
+              width={32}
+              height={32}
               src='https://cdn-icons-png.flaticon.com/512/10054/10054290.png'
               className='h-8 cursor-pointer'
               alt=''
@@ -229,7 +232,9 @@ function ChatInput ({ type, width }) {
           }
           id='emojis'
         >
-          <img
+          <Image
+            height={32}
+            width={32}
             src='https://cdn-icons-png.flaticon.com/512/166/166538.png'
             className='h-8 cursor-pointer'
             alt=''
@@ -263,7 +268,9 @@ function ChatInput ({ type, width }) {
           type='submit'
           className='h-8 w-8 flex justify-center items-center'
         >
-          <img
+          <Image
+            height={32}
+            width={32}
             src='https://cdn-icons-png.flaticon.com/512/3682/3682321.png'
             className={`h-full ${!(userInput || imageInfo) ? `grayscale` : ``}`}
             alt=''

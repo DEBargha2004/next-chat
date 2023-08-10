@@ -1,9 +1,9 @@
 import { Appstate } from '@/hooks/context'
 import { UserButton } from '@clerk/nextjs'
 import { useContext } from 'react'
-import ServiceMarker from './ServiceMarker'
 import ServiceComponent from './ServiceComponent'
 import { serviceList } from '@/constants/serviceList'
+import Image from 'next/image'
 
 function Sidenav ({ className }) {
   const { selectedService } = useContext(Appstate)
@@ -23,7 +23,9 @@ function Sidenav ({ className }) {
           ))}
         </div>
         <div className='flex flex-col items-center justify-between h-[20%]'>
-          <img
+          <Image
+            height={28}
+            width={28}
             src='https://cdn-icons-png.flaticon.com/512/2040/2040504.png'
             alt=''
             className='h-7 transition-all hover:rotate-45'

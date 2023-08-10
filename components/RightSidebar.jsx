@@ -1,19 +1,17 @@
-import { getImage } from '@/functions/getImage'
 import { Appstate } from '@/hooks/context'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useState } from 'react'
 import Avatar from './Avatar'
 import RightSidebarCompWrapper from './RightSidebarCompWrapper'
 import { format } from 'date-fns'
 import Userbox from './Userbox'
-import Link from 'next/link'
-import { selectUser } from '@/functions/selectUser'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { arrayRemove, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
+import Image from 'next/image'
 
 function RightSidebar ({ open, type }) {
-  const { selectedGroup, setSelectedChatUser, setSelectedService } =
+  const { selectedGroup, setSelectedChatUser, setSelectedService, setFriends } =
     useContext(Appstate)
   const { user } = useUser()
   const router = useRouter()
@@ -21,7 +19,9 @@ function RightSidebar ({ open, type }) {
 
   const ownerBadge = () => {
     return (
-      <img
+      <Image
+        height={16}
+        width={16}
         src='https://cdn-icons-png.flaticon.com/512/1828/1828884.png'
         className='h-4'
       />
@@ -41,7 +41,11 @@ function RightSidebar ({ open, type }) {
     if (user?.id === participant.user_id) {
       return
     } else {
-      selectUser({ setSelectedChatUser, item: participant })
+      setFriends(prev => {
+        const user = prev.find(user => user.user_id === participant.user_id)
+        if (user) return prev
+        return [...prev, participant]
+      })
       router.push(linkRef)
       setSelectedService('/chat')
     }
@@ -124,6 +128,7 @@ function RightSidebar ({ open, type }) {
                 <Userbox
                   key={participant.user_id}
                   item={participant}
+                  id={participant.user_id}
                   onClick={() =>
                     participant.user_id === user?.id
                       ? null
