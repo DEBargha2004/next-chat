@@ -21,7 +21,7 @@ function ChatMessageText ({ message }) {
   }, [message])
 
   const showSeenStatus = useMemo(() => {
-    if (message.sender_id === user.id) {
+    if (message.sender_id === user?.id) {
       return true
     } else {
       return false
@@ -29,7 +29,8 @@ function ChatMessageText ({ message }) {
   }, [message])
 
   useEffect(() => {
-    if (!message.message_read && user.id === message.receiver_id) {
+    if (!message.read_by?.includes(user?.id) && user.id !== message.sender_id) {
+      console.log('updating read_by')
       updateDoc(
         doc(
           firestoreDB,

@@ -1,11 +1,12 @@
 import { useUser } from '@clerk/nextjs'
 import Avatar from './Avatar'
 import ChatMessageText from './ChatMessageText'
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 
-function ChatMessage ({ message,database }) {
-  const { friends, selectedChatUser,setReferenceMessage,referenceMessage } = useContext(Appstate)
+function ChatMessage ({ message, database }) {
+  const { friends, selectedChatUser, setReferenceMessage, referenceMessage } =
+    useContext(Appstate)
   const { user, isLoaded } = useUser()
   const [isHovering, setIsHovering] = useState(false)
 
@@ -20,6 +21,31 @@ function ChatMessage ({ message,database }) {
     }
   }, [selectedChatUser, isLoaded])
 
+  const messageWithRefData = useMemo(() => {
+    if (!message.refMessage) return message
+    const user_info = database.find(
+      user => user.user_id === message.refMessage.sender_id
+    )
+    if (user_info.user_id === user?.id) {
+      return {
+        ...message,
+        refMessage: {
+          ...message.refMessage,
+          marker_color: '#2eca36',
+          sender: 'You'
+        }
+      }
+    } else {
+      return {
+        ...message,
+        refMessage: {
+          ...message.refMessage,
+          marker_color: '#b768ec',
+          sender: user_info.user_name
+        }
+      }
+    }
+  })
 
   return (
     <div
@@ -37,13 +63,13 @@ function ChatMessage ({ message,database }) {
         <div className='flex h-full items-start'>
           <Avatar url={userImageUrl} className={`h-8 w-8`} />
         </div>
-        <ChatMessageText message={message} />
+        <ChatMessageText message={messageWithRefData} />
         {isHovering ? (
           <img
             src='https://cdn-icons-png.flaticon.com/512/3388/3388597.png'
             className='h-6 ml-4 mr-4 p-1 cursor-pointer'
             alt=''
-            onClick={()=>setReferenceMessage(message)}
+            onClick={() => setReferenceMessage(message)}
           />
         ) : null}
       </div>

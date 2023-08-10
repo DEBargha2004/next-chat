@@ -34,8 +34,9 @@ export const setUpSubCollectionListener = async ({
       snapshots.docs.map(async (snapshot) => {
         // dealing with subcollection
         // its necessary to add docs
+        if(snapshot.data().messageId === '7a836af4-a46f-4689-b7dd-95a8dcc9346e') console.log(snapshot.data())
         if (
-          !snapshot.data().message_deliver &&
+          !snapshot.data().delivered_to?.includes(user?.id) &&
           snapshot.data().sender_id !== user.id
         ) {
           await updateDoc(

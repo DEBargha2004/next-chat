@@ -39,7 +39,7 @@ function Page({ params }) {
         <div className="w-full h-full flex justify-between items-center overflow-hidden">
           <div
             className={`h-full  transition-all duration-500 shrink-0`}
-            style={{ width: rightSidebar ? `65%` : `100%` }}
+            style={{ width: rightSidebar ? `60%` : `100%` }}
           >
             <ChatBoxHeader
               address={selectedGroup?.img}

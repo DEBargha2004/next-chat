@@ -16,10 +16,10 @@ export function GlobalAppStateProvider ({ children }) {
     user_id: null
   })
 
-  const [selectedGroup,setSelectedGroup] = useState(null)
+  const [selectedGroup, setSelectedGroup] = useState(null)
 
   const [friends, setFriends] = useState([])
-  const [groups,setGroups] = useState([])
+  const [groups, setGroups] = useState([])
   const [searchedFriend, setSearchedFriend] = useState([])
   const [presenceInfo, setPresenceInfo] = useState([])
   const [conversationsInfo, setConversationsInfo] = useState([])
@@ -40,11 +40,19 @@ export function GlobalAppStateProvider ({ children }) {
     if (sender_id === user?.id) {
       refInfo.sender = 'You'
     } else {
-      const friend_info = friends.find(
-        friend => friend.user_id === referenceMessage?.sender_id
-      )
-      refInfo.sender = friend_info?.user_name
-      refInfo.marker_color = '#b768ec'
+      if (selectedGroup?.id) {
+        const participant_info = selectedGroup.participants.find(
+          participant => participant.user_id === referenceMessage?.sender_id
+        )
+        refInfo.sender = participant_info?.user_name
+        refInfo.marker_color = '#b768ec'
+      } else {
+        const friend_info = friends.find(
+          friend => friend.user_id === referenceMessage?.sender_id
+        )
+        refInfo.sender = friend_info?.user_name
+        refInfo.marker_color = '#b768ec'
+      }
     }
 
     return refInfo
@@ -65,6 +73,11 @@ export function GlobalAppStateProvider ({ children }) {
   useEffect(() => {
     setReferenceMessage(null)
   }, [selectedChatUser?.user_id])
+
+  useEffect(()=>{
+    let local_participants = []
+    
+  },[groups])
 
   return (
     <Appstate.Provider

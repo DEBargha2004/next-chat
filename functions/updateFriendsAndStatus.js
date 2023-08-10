@@ -27,7 +27,7 @@ export async function updateFriendsAndStatus({
         local_storage.push(participant.data())
       })
       group_info.participants = local_storage
-      console.log(group_info);
+
       groups_info.push(group_info);
       continue;
     }

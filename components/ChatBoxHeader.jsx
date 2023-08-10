@@ -25,7 +25,6 @@ function ChatBoxHeader({ address, name, participants, type, onClick }) {
     }
   }, [selectedChatUser,selectedGroup]);
 
-  console.log(participants);
 
   return ifId_exist ? (
     <div className="w-full flex justify-between px-4 py-2 shadow-md shadow-[#00000017] truncate">

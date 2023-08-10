@@ -34,7 +34,6 @@ function MessagesList({ list,database }) {
     });
   }, [imageInfo, refMessageInfo]);
 
-  console.log(list);
 
   return (
     <div
@@ -53,6 +52,7 @@ function MessagesList({ list,database }) {
         <RefMessage
           refMessageInfo={refMessageInfo}
           onClick={() => setReferenceMessage(null)}
+          database={database}
         />
         <ChatInputImage imageInfo={imageInfo} setImageInfo={setImageInfo} />
       </div>
