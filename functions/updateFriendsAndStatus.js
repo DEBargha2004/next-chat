@@ -34,7 +34,9 @@ export async function updateFriendsAndStatus ({
 
       local_storage.map(participant => {
         const friend_id = participant.user_id
-        onValue(ref(realtimeDB, `users/${friend_id}`), snap => {
+        //checking if friend_info exists in localPresence
+        const friend_in_localPresence = localPresenceInfo.find(user => user.user_id === friend_id)
+        !friend_in_localPresence && onValue(ref(realtimeDB, `users/${friend_id}`), snap => {
           const user_presenceInfo = localPresenceInfo.find(
             info => info.user_id === friend_id
           )

@@ -31,22 +31,25 @@ function Userbox ({
   }, [presenceInfo])
 
   const unreadMessages = useMemo(() => {
-    const message_info = messages[item.user_id || item?.id]
+    const message_info = messages[id]
+    console.log(message_info,id);
     const unread_message_info = message_info?.filter(
-      message => !message.message_read && message.receiver_id === user.id
+      message => !message.read_by?.includes(user?.id) && message.sender_id !== user?.id
     )
 
     return unread_message_info
-  }, [messages[item.user_id || item?.id]])
+  }, [messages[id]])
+
+  console.log(unreadMessages);
 
   const lastMessage = useMemo(() => {
-    const messages_info = messages[item.user_id || `${item.id}`]
+    const messages_info = messages[id]
     const last_message_info = _.maxBy(messages_info, item =>
       _.get(item, 'message_createdAt.seconds')
     )
     // console.log(messages_info,last_message_info);
     return { ...last_message_info }
-  }, [messages[item.user_id || item?.id]])
+  }, [messages[id]])
 
   const OverviewOfLast = ({ message, unread }) => {
     return (
@@ -95,7 +98,7 @@ function Userbox ({
             {item.name || item.user_name}
           </h1>
           {/*based on condition*/}
-          <div className='flex items-center justify-between w-[42%]'>
+          <div className='flex items-center justify-end w-[42%]'>
             {badges?.owner}
             {badges?.admin}
             <p className='text-sm'>

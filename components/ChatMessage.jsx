@@ -1,12 +1,12 @@
 import { useUser } from '@clerk/nextjs'
 import Avatar from './Avatar'
 import ChatMessageText from './ChatMessageText'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 import Image from 'next/image'
 
 function ChatMessage ({ message, database }) {
-  const { friends, selectedChatUser, setReferenceMessage, referenceMessage } =
+  const { selectedChatUser, setReferenceMessage } =
     useContext(Appstate)
   const { user, isLoaded } = useUser()
   const [isHovering, setIsHovering] = useState(false)
@@ -24,10 +24,10 @@ function ChatMessage ({ message, database }) {
 
   const messageWithRefData = useMemo(() => {
     if (!message.refMessage) return message
-    const user_info = database.find(
+    const user_info = [...database,{user_id : user?.id}].find(
       user => user.user_id === message.refMessage.sender_id
     )
-    if (user_info.user_id === user?.id) {
+    if (user_info?.user_id === user?.id) {
       return {
         ...message,
         refMessage: {
@@ -42,7 +42,7 @@ function ChatMessage ({ message, database }) {
         refMessage: {
           ...message.refMessage,
           marker_color: '#b768ec',
-          sender: user_info.user_name
+          sender: user_info?.user_name
         }
       }
     }

@@ -5,7 +5,8 @@ export const selectUser = ({ setSelectedChatUser, item }) => {
       ...prev,
       user_name: item.user_name,
       user_img: item.user_img,
-      user_id: item.user_id
+      user_id: item.user_id,
+      user_email: item.user_email
     }
   })
 }

@@ -89,6 +89,7 @@ function FriendList({ UserboxComponent }) {
               onClick={() => selectUser({ setSelectedChatUser, item: item })}
               selected={selectedChatUser.user_id === item.user_id}
               OverlayComponent={OverlayComponent}
+              id={item.user_id}
             />
           </Link>
         );
