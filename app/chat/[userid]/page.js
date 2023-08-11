@@ -52,9 +52,15 @@ export default function page ({ params }) {
           <RightSidebar>
             <RightSidebarCompWrapper>
               <div className='flex flex-col items-center justify-center'>
-                <Avatar url={selectedChatUser?.user_img} />
+                <Avatar url={selectedChatUser?.user_img} className={`w-20 h-20`} />
                 <h1 className='text-xl font-medium mt-2'>{selectedChatUser?.user_name}</h1>
                 <p className='text-xs text-slate-600'>{selectedChatUser?.user_email}</p>
+              </div>
+            </RightSidebarCompWrapper>
+            <RightSidebarCompWrapper>
+              <div className='flex flex-col items-start justify-between'>
+                <p className='text-slate-800 text-lg font-semibold'>There is no place to hide</p>
+                <p className='text-slate-600 text-xs'>9 July</p>
               </div>
             </RightSidebarCompWrapper>
           </RightSidebar>

@@ -51,7 +51,7 @@ function ChatMessageText ({ message }) {
         message.message_type === 'text' ? `px-4` : `px-2`
       } mx-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white min-w-[100px] max-w-[300px]`}
     >
-      <RefMessage refMessageInfo={message.refMessage} className={`mb-2`} />
+      <RefMessage refMessageInfo={message.refMessage} className={`${message.refMessage ? `mb-2` : ``}`} type='chat' />
       <ChatMessageComponent {...{ message }} />
       <div
         className={`w-full text-[10px] flex ${

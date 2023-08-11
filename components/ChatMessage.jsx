@@ -8,6 +8,7 @@ import Image from 'next/image'
 function ChatMessage ({ message, database }) {
   const { selectedChatUser, setReferenceMessage } =
     useContext(Appstate)
+    
   const { user, isLoaded } = useUser()
   const [isHovering, setIsHovering] = useState(false)
 

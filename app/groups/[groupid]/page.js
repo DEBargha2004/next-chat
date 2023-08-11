@@ -1,11 +1,10 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Appstate } from '@/hooks/context'
 import ChatBoxHeader from '@/components/ChatBoxHeader'
 import MessagesList from '@/components/MessagesList'
 import ChatInput from '@/components/ChatInput'
-import { motion } from 'framer-motion'
 import RightSidebar from '@/components/RightSidebar'
 import AdminBadge from '@/components/Badges/AdminBadge'
 import OwnerBadge from '@/components/Badges/OwnerBadge'
@@ -16,20 +15,46 @@ import Userbox from '@/components/Userbox'
 import { handleSelectUser_For_Conversation } from '@/functions/handleSelectUser_For_Conversation'
 import { leaveGroup } from '@/functions/leaveGroup'
 import { useUser } from '@clerk/nextjs'
+import Searchbar from '@/components/Searchbar'
+import { handleSearchUser } from '@/functions/handleSearchUser'
+import { cloneDeep } from 'lodash'
+import Image from 'next/image'
+import tick from '../../../public/tick.png'
+import {
+  doc,
+  increment,
+  serverTimestamp,
+  setDoc,
+  updateDoc
+} from 'firebase/firestore'
+import { firestoreDB } from '@/firebase.config'
 
 function Page ({ params }) {
-  const {
-    groups,
-    selectedChatUser,
-    setSelectedChatUser,
-    messages,
-    setSelectedGroup,
-    selectedGroup
-  } = useContext(Appstate)
+  const { groups, messages, setSelectedGroup, selectedGroup } =
+    useContext(Appstate)
+
   const full_id = `group_${params.groupid}`
   const [showChatPage, setShowChatPage] = useState(true)
   const [rightSidebar, setRightSidebar] = useState(false)
+  const [friendQuery, setFriendQuery] = useState('')
+  const [selectedUsersId, setSelectedUsersId] = useState([])
+  const [searchedFriend, setSearchedFriend] = useState([])
+  const [noResponse, setNoResponse] = useState(false)
   const { user } = useUser()
+  const addFriendDialogBoxRef = useRef(null)
+
+  const handleSelectedUsers = userId => {
+    if (!selectedUsersId.includes(userId)) {
+      setSelectedUsersId(prev => [...prev, userId])
+    } else {
+      const index = selectedUsersId.indexOf(userId)
+      setSelectedUsersId(prev => {
+        prev = cloneDeep(prev)
+        prev.splice(index, 1)
+        return [...prev]
+      })
+    }
+  }
 
   useEffect(() => {
     if (selectedGroup?.id !== full_id) {
@@ -42,6 +67,64 @@ function Page ({ params }) {
       }
     }
   }, [groups])
+
+  const openAddFriendDialog = () => {
+    addFriendDialogBoxRef.current.showModal()
+  }
+
+  const closeAddFriendDialog = () => {
+    if (noResponse) return
+    addFriendDialogBoxRef.current.close()
+    setFriendQuery('')
+    setSearchedFriend([])
+    setSelectedUsersId([])
+  }
+
+  const addSelectedFriends = async () => {
+    if (!selectedUsersId.length) return
+    if (noResponse) return
+    setNoResponse(true)
+    const conversation_info = {
+      conversation_id: selectedGroup?.conversation_id,
+      createdAt: selectedGroup?.createdAt,
+      type: 'group'
+    }
+    for (const id of selectedUsersId) {
+      await setDoc(
+        doc(
+          firestoreDB,
+          `users/${id}/conversations/${selectedGroup?.conversation_id}`
+        ),
+        conversation_info
+      )
+      const userInfo = searchedFriend.find(friend => friend.user_id === id)
+      await setDoc(
+        doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${id}`),
+        {
+          ...userInfo
+        }
+      )
+      await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {
+        participantsCount: increment(1)
+      })
+    }
+
+    addFriendDialogBoxRef.current.close()
+    setNoResponse(false)
+  }
+
+  const Overlay = () => {
+    return (
+      <div className='w-full h-full absolute top-0 left-0 -z-10 bg-green-300'>
+        <Image
+          src={tick.src}
+          width={28}
+          height={28}
+          className='w-7 z-10 absolute right-4 top-[50%] -translate-y-[50%]'
+        />
+      </div>
+    )
+  }
 
   return (
     <>
@@ -143,6 +226,14 @@ function Page ({ params }) {
                 </button>
               </div>
             </RightSidebarCompWrapper>
+            <RightSidebarCompWrapper>
+              <button
+                className='px-2 py-1 rounded bg-blue-600 text-white'
+                onClick={openAddFriendDialog}
+              >
+                Add participant
+              </button>
+            </RightSidebarCompWrapper>
           </RightSidebar>
         </div>
       ) : (
@@ -150,6 +241,53 @@ function Page ({ params }) {
           {/* User doesnot exist */}
         </div>
       )}
+
+      <dialog ref={addFriendDialogBoxRef}>
+        <Searchbar
+          placeholder={`Search more`}
+          value={friendQuery}
+          onChange={e =>
+            handleSearchUser({
+              e,
+              user_id: user?.id,
+              excluded: selectedGroup?.participants.filter(
+                participant => !participant.left
+              ),
+              setQuery: setFriendQuery
+            }).then(result => {
+              setSearchedFriend(result.data)
+            })
+          }
+        />
+        {searchedFriend.map(user => (
+          <Userbox
+            key={user.user_id}
+            item={user}
+            onClick={() => handleSelectedUsers(user.user_id)}
+            selected={selectedUsersId.includes(user.user_id)}
+            OverlayComponent={Overlay}
+          />
+        ))}
+        <button
+          className={`bg-blue-600 text-white px-2 py-1 rounded
+          ${
+            noResponse || !selectedUsersId.length
+              ? `grayscale cursor-not-allowed`
+              : ``
+          }`}
+          onClick={addSelectedFriends}
+        >
+          Add
+        </button>
+        <button
+          className={`bg-red-500 text-white px-2 py-1 rounded ${
+            noResponse ? `grayscale cursor-not-allowed` : ``
+          }`}
+          onClick={closeAddFriendDialog}
+        >
+          Cancel
+        </button>
+      </dialog>
     </>
   )
 }

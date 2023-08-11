@@ -1,6 +1,11 @@
-import { arrayRemove, deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import {
+  arrayRemove,
+  deleteDoc,
+  doc,
+  increment,
+  updateDoc
+} from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
-
 
 export const leaveGroup = async ({ user, selectedGroup, router }) => {
   const finalDecision = prompt('Enter Confirm to exit')
@@ -19,6 +24,11 @@ export const leaveGroup = async ({ user, selectedGroup, router }) => {
         left: true
       }
     ))
+
+  isParticipant &&
+    (await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {
+      participantsCount: increment(-1)
+    }))
 
   isOwner &&
     (await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {

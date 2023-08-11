@@ -35,23 +35,26 @@ export function GlobalAppStateProvider ({ children }) {
       sender_id,
       message_data: referenceMessage?.message_data,
       message_type: referenceMessage?.message_type,
-      marker_color: '#2eca36'
+      marker_color: ''
     }
-    if (sender_id === user?.id) {
-      refInfo.sender = 'You'
-    } else {
-      if (selectedGroup?.id) {
-        const participant_info = selectedGroup.participants.find(
-          participant => participant.user_id === referenceMessage?.sender_id
-        )
-        refInfo.sender = participant_info?.user_name
-        refInfo.marker_color = '#b768ec'
+    if (sender_id) {
+      if (sender_id === user?.id) {
+        refInfo.sender = 'You'
+        refInfo.marker_color = '#2eca36'
       } else {
-        const friend_info = friends.find(
-          friend => friend.user_id === referenceMessage?.sender_id
-        )
-        refInfo.sender = friend_info?.user_name
-        refInfo.marker_color = '#b768ec'
+        if (selectedGroup?.id) {
+          const participant_info = selectedGroup.participants.find(
+            participant => participant.user_id === referenceMessage?.sender_id
+          )
+          refInfo.sender = participant_info?.user_name
+          refInfo.marker_color = '#b768ec'
+        } else {
+          const friend_info = friends.find(
+            friend => friend.user_id === referenceMessage?.sender_id
+          )
+          refInfo.sender = friend_info?.user_name
+          refInfo.marker_color = '#b768ec'
+        }
       }
     }
 
@@ -74,10 +77,9 @@ export function GlobalAppStateProvider ({ children }) {
     setReferenceMessage(null)
   }, [selectedChatUser?.user_id])
 
-  useEffect(()=>{
+  useEffect(() => {
     let local_participants = []
-    
-  },[groups])
+  }, [groups])
 
   return (
     <Appstate.Provider
