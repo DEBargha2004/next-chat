@@ -207,7 +207,7 @@ function ChatInput ({ type, width }) {
               height={32}
               src='https://cdn-icons-png.flaticon.com/512/10054/10054290.png'
               className='h-8 cursor-pointer'
-              alt=''
+              alt='addImage'
             />
           </div>
         </label>
@@ -237,7 +237,7 @@ function ChatInput ({ type, width }) {
             width={32}
             src='https://cdn-icons-png.flaticon.com/512/166/166538.png'
             className='h-8 cursor-pointer'
-            alt=''
+            alt='emoji-icon'
             id='emoji_icon'
           />
           {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
@@ -273,7 +273,7 @@ function ChatInput ({ type, width }) {
             width={32}
             src='https://cdn-icons-png.flaticon.com/512/3682/3682321.png'
             className={`h-full ${!(userInput || imageInfo) ? `grayscale` : ``}`}
-            alt=''
+            alt='send message'
           />
         </button>
       </form>

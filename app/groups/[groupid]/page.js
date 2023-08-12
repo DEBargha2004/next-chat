@@ -28,10 +28,19 @@ import {
   updateDoc
 } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
+import { useRouter } from 'next/navigation'
 
 function Page ({ params }) {
-  const { groups, messages, setSelectedGroup, selectedGroup } =
-    useContext(Appstate)
+  const {
+    groups,
+    messages,
+    setSelectedGroup,
+    selectedGroup,
+    setSelectedService,
+    setFriends
+  } = useContext(Appstate)
+
+  const router = useRouter()
 
   const full_id = `group_${params.groupid}`
   const [showChatPage, setShowChatPage] = useState(true)
@@ -111,8 +120,19 @@ function Page ({ params }) {
 
     addFriendDialogBoxRef.current.close()
     setNoResponse(false)
+    location.reload()
   }
 
+  const showInfo = id => {
+    if (!selectedGroup?.admin?.includes(user?.id)) return false
+    if (user?.id === selectedGroup?.owner?.user_id) {
+      if (id === user?.id) return false
+      return true
+    } else {
+      if (selectedGroup?.admin?.includes(id)) return false
+      return true
+    }
+  }
   const Overlay = () => {
     return (
       <div className='w-full h-full absolute top-0 left-0 -z-10 bg-green-300'>
@@ -121,10 +141,27 @@ function Page ({ params }) {
           width={28}
           height={28}
           className='w-7 z-10 absolute right-4 top-[50%] -translate-y-[50%]'
+          alt='tick'
         />
       </div>
     )
   }
+
+  const ParticipantsOverlay = () => {
+    return (
+      <div className='z-10 w-full h-full absolute top-0 left-0'>
+        <img
+          src='	https://cdn-icons-png.flaticon.com/512/2311/2311524.png'
+          className='absolute h-8 p-2 right-2 top-[50%] -translate-y-[50%] rounded-full hover:bg-gray-700 hover:invert transition-all'
+          alt=''
+          id='participantsInfo'
+        />
+      </div>
+    )
+  }
+
+
+
 
   return (
     <>
@@ -167,9 +204,20 @@ function Page ({ params }) {
                 <p className='text- mb-2'>{selectedGroup?.description}</p>
                 <p className='text-xs text-slate-500 font-medium'>
                   Created by {selectedGroup?.owner?.user_name},{` `}
-                  {format(selectedGroup?.createdAt?.seconds || 0, 'dd/MM/yy')}
+                  {format(
+                    selectedGroup?.createdAt?.seconds * 1000 || 0,
+                    'dd/MM/yy'
+                  )}
                 </p>
               </div>
+            </RightSidebarCompWrapper>
+            <RightSidebarCompWrapper>
+              <button
+                className='px-2 py-1 rounded bg-blue-600 text-white'
+                onClick={openAddFriendDialog}
+              >
+                Add participant
+              </button>
             </RightSidebarCompWrapper>
             <RightSidebarCompWrapper disablePadding>
               <div>
@@ -184,7 +232,15 @@ function Page ({ params }) {
                         key={participant.user_id}
                         item={participant}
                         id={participant.user_id}
-                        onClick={() =>
+                        onClick={e => {
+                          const info =
+                            document.getElementById('participantsInfo')
+
+                          if (e.target.id === info.id) {
+                            removeParticipant(participant.user_id)
+                            return
+                          }
+
                           participant.user_id === user?.id
                             ? null
                             : handleSelectUser_For_Conversation({
@@ -194,7 +250,7 @@ function Page ({ params }) {
                                 setSelectedService,
                                 user
                               })
-                        }
+                        }}
                         badges={{
                           owner:
                             selectedGroup?.owner?.user_id ===
@@ -210,6 +266,7 @@ function Page ({ params }) {
                         disableHoverEffect={
                           participant.user_id === user?.id ? true : false
                         }
+                        enableMoreInfo={showInfo(participant.user_id)}
                       />
                     ) : null
                   })}
@@ -220,19 +277,21 @@ function Page ({ params }) {
               <div className='flex justify-center'>
                 <button
                   className='bg-red-500 text-white w-[70%] transition-all py-1 rounded uppercase hover:bg-red-700 '
-                  onClick={() => leaveGroup({ user, selectedGroup, router })}
+                  onClick={() => {
+                    const finalDecision = prompt('Enter Confirm to exit')
+                    if (finalDecision !== `Confirm`) return
+
+                    leaveGroup({
+                      id: user?.id,
+                      selectedGroup,
+                      router,
+                      redirect
+                    })
+                  }}
                 >
                   Leave
                 </button>
               </div>
-            </RightSidebarCompWrapper>
-            <RightSidebarCompWrapper>
-              <button
-                className='px-2 py-1 rounded bg-blue-600 text-white'
-                onClick={openAddFriendDialog}
-              >
-                Add participant
-              </button>
             </RightSidebarCompWrapper>
           </RightSidebar>
         </div>

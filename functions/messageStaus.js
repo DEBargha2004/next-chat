@@ -18,7 +18,7 @@ export default function messageStatus (message, color) {
           height={16}
           src={!color ? dark_deliver_letter_open.src : deliver_letter_open.src}
           className='h-4 w-auto'
-          alt=''
+          alt='message-status-open'
         />
       ) : (
         <Image
@@ -28,7 +28,7 @@ export default function messageStatus (message, color) {
             !color ? dark_deliver_letter_close.src : deliver_letter_close.src
           }
           className='h-4 w-auto'
-          alt=''
+          alt='message-status-close'
         />
       )
     ) : (
@@ -37,7 +37,7 @@ export default function messageStatus (message, color) {
         height={16}
         src={!color ? dark_delivering_letter.src : delivering_letter.src}
         className='h-4 w-auto'
-        alt=''
+        alt='message-status-delivering'
       />
     )
   ) : null

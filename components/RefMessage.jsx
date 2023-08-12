@@ -35,7 +35,7 @@ function RefMessage ({ refMessageInfo, onClick, className, type }) {
               height={13}
               src='https://cdn-icons-png.flaticon.com/512/16/16410.png'
               className='h-[13px] opacity-60 mr-1'
-              alt=''
+              alt='image-icon'
             />
           ) : null}
 

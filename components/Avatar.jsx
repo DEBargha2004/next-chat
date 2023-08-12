@@ -23,10 +23,10 @@ function Avatar ({ url, online, className, group, address, id }) {
       <Image
         height={60}
         width={60}
-        src={processedUrl ? processedUrl : url ? url : noProfile()}
+        src={processedUrl ? processedUrl : url ? url : icons.group}
         // src={url ? url : noProfile()}
         className={`h-12 w-12 object-cover rounded-full ${className}`}
-        alt=''
+        alt='groupImage'
       />
       {online && id !== user?.id ? (
         online === 'away' ? (

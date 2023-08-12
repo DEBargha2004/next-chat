@@ -27,7 +27,7 @@ function Sidenav ({ className }) {
             height={28}
             width={28}
             src='https://cdn-icons-png.flaticon.com/512/2040/2040504.png'
-            alt=''
+            alt='settings-icon'
             className='h-7 transition-all hover:rotate-45'
           />
           <UserButton />

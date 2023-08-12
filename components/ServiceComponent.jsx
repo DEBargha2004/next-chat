@@ -28,7 +28,7 @@ function ServiceComponent ({ url, index, to }) {
             className=' w-1 bg-cyan-500 rounded-lg transition-all duration-75 ease-linear absolute -left-[1px]'
           ></motion.div>
         ) : null}
-        <Image height={28} width={28} src={url} className='h-7' alt='' />
+        <Image height={28} width={28} src={url} className='h-7' alt={to.replace('/','')} />
       </div>
     </Link>
   )

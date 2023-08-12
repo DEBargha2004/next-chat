@@ -66,7 +66,7 @@ const ParticipantsList = ({ list, Component, componentStyle }) => {
           <Component url={user.user_img} className={componentStyle} />
         ) : (
           <div className='w-11 mr-3' key={index}>
-            <Image src={user.user_img} className='w-10 rounded-full' />
+            <Image src={user.user_img} className='w-10 rounded-full' alt='user-image' />
             <h1 className='text-xs truncate'>{user.user_name}</h1>
           </div>
         )
@@ -284,6 +284,7 @@ export default function RootLayout ({ children }) {
           height={28}
           src={tick.src}
           className='w-7 z-10 absolute right-4 top-[50%] -translate-y-[50%]'
+          alt='tick'
         />
       </div>
     )

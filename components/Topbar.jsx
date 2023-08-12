@@ -15,7 +15,7 @@ export default function Topbar ({ linkedElement: { url, to, service } }) {
             height={32}
             src={messenger.src}
             className='w-8 p-1'
-            alt=''
+            alt='messenger-icon'
             onClick={() => setSelectedService('')}
           />
         </Link>
@@ -25,7 +25,7 @@ export default function Topbar ({ linkedElement: { url, to, service } }) {
             height={32}
             src={url}
             className='w-8 p-1 rounded-md transition-all hover:bg-slate-100'
-            alt=''
+            alt='single-to-group-navigation'
             onClick={() => setSelectedService(service)}
           />
         </Link>

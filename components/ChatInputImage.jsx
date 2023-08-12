@@ -21,7 +21,7 @@ function ChatInputImage ({ imageInfo, setImageInfo }) {
             width={15}
             src='https://cdn-icons-png.flaticon.com/512/1828/1828778.png' // close ( x )
             className='h-[80%]'
-            alt=''
+            alt='cancel'
           />
         </div>
       </div>

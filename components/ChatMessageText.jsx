@@ -113,7 +113,7 @@ function ChatMessageComponent ({ message }) {
       {url ? (
         <Image
           src={url}
-          alt=''
+          alt='selected Image'
           className='w-[300px] rounded-lg h-[300px] object-cover'
           onLoad={handleImageLoad}
           height={300}

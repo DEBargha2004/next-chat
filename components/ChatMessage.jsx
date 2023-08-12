@@ -72,7 +72,7 @@ function ChatMessage ({ message, database }) {
             width={24}
             src='https://cdn-icons-png.flaticon.com/512/3388/3388597.png'
             className='h-6 ml-4 mr-4 p-1 cursor-pointer'
-            alt=''
+            alt='reply'
             onClick={() => setReferenceMessage(message)}
           />
         ) : null}

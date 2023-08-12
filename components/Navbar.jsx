@@ -5,7 +5,7 @@ import { UserButton } from "@clerk/nextjs"
 function Navbar() {
   return (
     <div className="p-4 flex justify-between">
-        <Image src={messenger} className="h-9 w-auto" />
+        <Image src={messenger} className="h-9 w-auto" alt="messenger" />
         <UserButton />
     </div>
   )

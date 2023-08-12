@@ -7,19 +7,20 @@ import {
 } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 
-export const leaveGroup = async ({ user, selectedGroup, router }) => {
-  const finalDecision = prompt('Enter Confirm to exit')
-  if (finalDecision !== `Confirm`) return
-  const user_id = user?.id
-  const isOwner = Boolean(selectedGroup?.user_id)
-  const isAdmin = selectedGroup?.admin.includes(user_id)
+export const leaveGroup = async ({ id, selectedGroup, router,redirect }) => {
+  if (!id) return
+
+  const isOwner = Boolean(selectedGroup?.owner?.user_id === id)
+  const isAdmin = selectedGroup?.admin.includes(id)
   const isParticipant = selectedGroup?.participants?.find(
-    participant => participant.user_id === user_id
+    participant => participant.user_id === id
   )
+
+  console.log(isParticipant)
 
   isParticipant &&
     (await updateDoc(
-      doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${user_id}`),
+      doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${id}`),
       {
         left: true
       }
@@ -36,14 +37,15 @@ export const leaveGroup = async ({ user, selectedGroup, router }) => {
     }))
   isAdmin &&
     (await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {
-      admin: arrayRemove(user?.id)
+      admin: arrayRemove(id)
     }))
   await deleteDoc(
     doc(
       firestoreDB,
-      `users/${user?.id}/conversations/${selectedGroup?.conversation_id}`
+      `users/${id}/conversations/${selectedGroup?.conversation_id}`
     )
   )
 
-  router.replace(`/groups`)
+  redirect && router.replace(`/groups`)
+  !redirect && location.reload()
 }

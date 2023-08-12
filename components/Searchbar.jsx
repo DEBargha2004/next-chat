@@ -17,7 +17,7 @@ export default function Searchbar ({ onChange, value, placeholder }) {
           width={20}
           src='https://cdn-icons-png.flaticon.com/512/54/54481.png'
           className='h-5 absolute right-2 top-[10px] opacity-60 scale-90'
-          alt=''
+          alt='search-icon'
         />
       </div>
     </div>
