@@ -10,17 +10,23 @@ import messageStatus from '@/functions/messageStaus'
 import Image from 'next/image'
 import { leaveGroup } from '@/functions/leaveGroup'
 import { useRouter } from 'next/navigation'
-import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore'
+import { arrayRemove, arrayUnion, doc, updateDoc,getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 
-const RemoveParticipant = ({ id, router, selectedGroup,user }) => {
+const RemoveParticipant = async ({ id, router, selectedGroup, user }) => {
+  const docInfo = await getDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`))
+  const adminInfo = docInfo.get('admin')
+  if (!adminInfo.includes(user?.id)) {
+    alert('You are no longer an admin')
+    return
+  }
   const finalDecision = prompt('type REMOVE to remove participant')
   if (finalDecision === 'REMOVE') {
     if (
       selectedGroup?.owner?.user_id === user.id ||
       selectedGroup?.admin?.includes(user.id)
     ) {
-      leaveGroup({ id, router, selectedGroup,user })
+      leaveGroup({ id, router, selectedGroup })
     }
   }
 }
@@ -132,8 +138,22 @@ const ParticipantsOverlay = ({
   const { selectedGroup, setSelectedGroup, setGroups } = useContext(Appstate)
   const router = useRouter()
   const { user: loggedUser } = useUser()
-  const isAdmin = selectedGroup?.admin?.includes(user.user_id)
+
+  const [isAdmin, setIsAdmin] = useState(
+    selectedGroup?.admin?.includes(user.user_id)
+  )
+
   const change_Participant_Status = async () => {
+    const docInfo = await getDoc(
+      doc(firestoreDB, `groups/${selectedGroup?.id}`)
+    )
+    const adminInfo = docInfo.get('admin')
+
+    if (!adminInfo.includes(loggedUser?.id)) {
+      setIsAdmin(false)
+      alert('You are no longer an admin')
+      return
+    }
     if (!isAdmin) {
       await updateDoc(doc(firestoreDB, `groups/${selectedGroup.id}`), {
         admin: arrayUnion(user.user_id)

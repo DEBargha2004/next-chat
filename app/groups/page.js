@@ -1,8 +1,15 @@
 "use client";
 
+import { updateGroups } from "@/functions/updateGroups";
+import { Appstate } from "@/hooks/context";
 import { motion } from "framer-motion";
+import { useContext, useEffect } from "react";
 
 function Page() {
+
+  const {conversationsInfo,setGroups} = useContext(Appstate)
+
+
   return (
     <section className="h-full w-full flex flex-col justify-center items-center">
       <motion.img

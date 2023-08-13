@@ -18,6 +18,7 @@ import { firestoreDB } from '@/firebase.config'
 import { Appstate } from '@/hooks/context'
 import Link from 'next/link'
 import Image from 'next/image'
+import { updateGroups } from '@/functions/updateGroups'
 
 const GroupInfo = ({ groupInfo, setGroupInfo, list }) => {
   const handleGroupImage = e => {
@@ -89,7 +90,7 @@ const SelectParticipants = ({ error, children, query, onChange, list }) => {
 export default function RootLayout ({ children }) {
   const chat = serviceList.find(service => service.service === 'chat')
 
-  const { groups, setSelectedGroup, selectedGroup } = useContext(Appstate)
+  const { groups, setSelectedGroup, selectedGroup,conversationsInfo,setGroups } = useContext(Appstate)
   const { user } = useUser()
   let isProcessing = false
   const [processing, setProcessing] = useState(false)
@@ -295,6 +296,14 @@ export default function RootLayout ({ children }) {
       <div className='-z-10 bg-slate-200 w-full h-full absolute left-0 top-0'></div>
     )
   }
+
+  useEffect(()=>{
+    for(const conversation_info of conversationsInfo){
+      if(conversation_info.type === 'group'){
+        updateGroups({conversation_info,setGroups})
+      }
+    }
+  },[conversationsInfo])
 
   return (
     <>

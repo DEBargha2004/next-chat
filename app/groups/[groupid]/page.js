@@ -22,6 +22,7 @@ import Image from 'next/image'
 import tick from '../../../public/tick.png'
 import {
   doc,
+  getDoc,
   increment,
   serverTimestamp,
   setDoc,
@@ -29,6 +30,7 @@ import {
 } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 import { useRouter } from 'next/navigation'
+import { updatePresenceStatus } from '@/functions/updatePresenceStatus'
 
 function Page ({ params }) {
   const {
@@ -37,7 +39,8 @@ function Page ({ params }) {
     setSelectedGroup,
     selectedGroup,
     setSelectedService,
-    setFriends
+    setFriends,
+    setPresenceInfo
   } = useContext(Appstate)
 
   const router = useRouter()
@@ -93,29 +96,38 @@ function Page ({ params }) {
     if (!selectedUsersId.length) return
     if (noResponse) return
     setNoResponse(true)
-    const conversation_info = {
-      conversation_id: selectedGroup?.conversation_id,
-      createdAt: selectedGroup?.createdAt,
-      type: 'group'
-    }
-    for (const id of selectedUsersId) {
-      await setDoc(
-        doc(
-          firestoreDB,
-          `users/${id}/conversations/${selectedGroup?.conversation_id}`
-        ),
-        conversation_info
-      )
-      const userInfo = searchedFriend.find(friend => friend.user_id === id)
-      await setDoc(
-        doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${id}`),
-        {
-          ...userInfo
-        }
-      )
-      await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {
-        participantsCount: increment(1)
-      })
+    const docInfo = await getDoc(
+      doc(firestoreDB, `groups/${selectedGroup?.id}`)
+    )
+    const adminInfo = docInfo.get('admin')
+    if (!adminInfo.includes(user?.id)) {
+      alert('You are no longer an admin')
+      return
+    } else {
+      const conversation_info = {
+        conversation_id: selectedGroup?.conversation_id,
+        createdAt: selectedGroup?.createdAt,
+        type: 'group'
+      }
+      for (const id of selectedUsersId) {
+        await setDoc(
+          doc(
+            firestoreDB,
+            `users/${id}/conversations/${selectedGroup?.conversation_id}`
+          ),
+          conversation_info
+        )
+        const userInfo = searchedFriend.find(friend => friend.user_id === id)
+        await setDoc(
+          doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${id}`),
+          {
+            ...userInfo
+          }
+        )
+        await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {
+          participantsCount: increment(1)
+        })
+      }
     }
 
     addFriendDialogBoxRef.current.close()
@@ -147,21 +159,11 @@ function Page ({ params }) {
     )
   }
 
-  const ParticipantsOverlay = () => {
-    return (
-      <div className='z-10 w-full h-full absolute top-0 left-0'>
-        <img
-          src='	https://cdn-icons-png.flaticon.com/512/2311/2311524.png'
-          className='absolute h-8 p-2 right-2 top-[50%] -translate-y-[50%] rounded-full hover:bg-gray-700 hover:invert transition-all'
-          alt=''
-          id='participantsInfo'
-        />
-      </div>
-    )
-  }
-
-
-
+  useEffect(() => {
+    selectedGroup?.participants?.map(participant => {
+      updatePresenceStatus({ setPresenceInfo, id: participant.user_id })
+    })
+  }, [selectedGroup])
 
   return (
     <>
@@ -211,14 +213,16 @@ function Page ({ params }) {
                 </p>
               </div>
             </RightSidebarCompWrapper>
-            <RightSidebarCompWrapper>
-              <button
-                className='px-2 py-1 rounded bg-blue-600 text-white'
-                onClick={openAddFriendDialog}
-              >
-                Add participant
-              </button>
-            </RightSidebarCompWrapper>
+            {selectedGroup?.admin.includes(user?.id) ? (
+              <RightSidebarCompWrapper>
+                <button
+                  className='px-2 py-1 rounded bg-blue-600 text-white'
+                  onClick={openAddFriendDialog}
+                >
+                  Add participant
+                </button>
+              </RightSidebarCompWrapper>
+            ) : null}
             <RightSidebarCompWrapper disablePadding>
               <div>
                 <div className='flex justify-between items-center text-md text-slate-500 p-3'>
@@ -235,11 +239,6 @@ function Page ({ params }) {
                         onClick={e => {
                           const info =
                             document.getElementById('participantsInfo')
-
-                          if (e.target.id === info.id) {
-                            removeParticipant(participant.user_id)
-                            return
-                          }
 
                           participant.user_id === user?.id
                             ? null
@@ -278,14 +277,14 @@ function Page ({ params }) {
                 <button
                   className='bg-red-500 text-white w-[70%] transition-all py-1 rounded uppercase hover:bg-red-700 '
                   onClick={() => {
-                    const finalDecision = prompt('Enter Confirm to exit')
-                    if (finalDecision !== `Confirm`) return
+                    const finalDecision = prompt('Type CONFIRM to exit')
+                    if (finalDecision !== `CONFIRM`) return
 
                     leaveGroup({
                       id: user?.id,
                       selectedGroup,
                       router,
-                      redirect
+                      redirect : true
                     })
                   }}
                 >
