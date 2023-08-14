@@ -12,7 +12,7 @@ export async function updateGroups ({ conversation_info, setGroups }) {
   const participants = await getDocs(
     collection(firestoreDB, `groups/${group_info.id}/participants`)
   )
-  participants.docs.forEach(participant => {
+  participants.docs?.forEach(participant => {
     local_storage_participants.push(participant.data())
   })
   

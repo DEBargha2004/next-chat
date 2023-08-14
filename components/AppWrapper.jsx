@@ -111,7 +111,7 @@ export default function AppWrapper ({ children }) {
     return () => {
       // unsub()
       unSubMessages()
-      unsub_subcollection_list.forEach(unsub => unsub())
+      unsub_subcollection_list?.forEach(unsub => unsub())
     }
   }, [isLoaded])
 
@@ -141,7 +141,7 @@ export default function AppWrapper ({ children }) {
   useEffect(() => {
     const appPath = location.pathname
     const pathArray = appPath.split('/')
-    serviceList.forEach(service => {
+    serviceList?.forEach(service => {
       if (pathArray.includes(service.service)) {
         setSelectedService(service.to)
       }

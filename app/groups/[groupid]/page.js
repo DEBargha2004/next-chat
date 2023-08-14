@@ -213,7 +213,7 @@ function Page ({ params }) {
                 </p>
               </div>
             </RightSidebarCompWrapper>
-            {selectedGroup?.admin.includes(user?.id) ? (
+            {selectedGroup?.admin?.includes(user?.id) ? (
               <RightSidebarCompWrapper>
                 <button
                   className='px-2 py-1 rounded bg-blue-600 text-white'

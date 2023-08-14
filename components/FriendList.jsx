@@ -25,7 +25,7 @@ function FriendList({ UserboxComponent }) {
     setFriends((prev) => {
       prev = cloneDeep(prev);
       try {
-        prev.forEach((friend) => {
+        prev?.forEach((friend) => {
           const friend_id = friend.user_id;
           const user_friend_Message = messages[friend_id];
           const lastMessage = user_friend_Message
