@@ -12,7 +12,7 @@ function page () {
   const postImageRef = useRef(null)
   const [image, setImage] = useState({ url: '', file: null })
   const [desc, setDesc] = useState('')
-  const [uploading,setUploading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const { user } = useUser()
 
   const handlePostDescriptionChange = e => {
@@ -34,7 +34,7 @@ function page () {
     reader.readAsDataURL(e.target.files[0])
   }
   const handleSubmit = async e => {
-    if(uploading) return
+    if (uploading) return
     if (!desc && !image.url) return
     setUploading(true)
     const postId = v4()
@@ -61,7 +61,11 @@ function page () {
       shareCount
     }
 
-    await uploadBytes(ref(contentDB, postImageAddress), image.file)
+    !image.file && delete post.postImageAddress
+    !desc && delete post.postDescription
+
+    image.file &&
+      (await uploadBytes(ref(contentDB, postImageAddress), image.file))
     await setDoc(doc(firestoreDB, `posts/${postId}`), post)
 
     setDesc('')
@@ -88,7 +92,9 @@ function page () {
           value={desc}
         />
         <button
-          className={`px-2 py-1 rounded bg-blue-500 text-white ${uploading ? `grayscale cursor-not-allowed` : ``}`}
+          className={`px-2 py-1 rounded bg-blue-500 text-white ${
+            uploading ? `grayscale cursor-not-allowed` : ``
+          }`}
           onClick={handleSubmit}
         >
           Submit

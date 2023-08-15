@@ -12,12 +12,16 @@ import {
 } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 import { cloneDeep } from 'lodash'
+import { LocalContext } from '../Post'
+import { getComments } from '@/functions/getComments'
 
-function PostRightBar ({ classname }) {
+function CommentsSection ({ classname }) {
   const { selectedComment, posts, setPosts } = useContext(Appstate)
+  const { commentBox, setCommentBox } = useContext(LocalContext)
+
   const { user } = useUser()
   const [comment_Val, setComment_Val] = useState('')
-  const [userComments, setUserComments] = useState([])
+
   const handleSubmitComment = e => {
     e.preventDefault()
     if (!comment_Val) return
@@ -31,20 +35,23 @@ function PostRightBar ({ classname }) {
       creator
     }
     setDoc(
-      doc(
-        firestoreDB,
-        `posts/${selectedComment?.postId}/comments/${commentId}`
-      ),
+      doc(firestoreDB, `posts/${commentBox.postId}/comments/${commentId}`),
       comment
     )
-    updateDoc(doc(firestoreDB, `posts/${selectedComment?.postId}`), {
+    updateDoc(doc(firestoreDB, `posts/${commentBox.postId}`), {
       commentsCount: increment(1)
     })
-    setPosts(prev => {
+    // setPosts(prev => {
+    //   prev = cloneDeep(prev)
+    //   const post = prev.find(post => post.postId === selectedComment?.postId)
+    //   post.comments.splice(0, 0, comment)
+    //   post.commentsCount = post.commentsCount + 1
+    //   return prev
+    // })
+    setCommentBox(prev => {
       prev = cloneDeep(prev)
-      const post = prev.find(post => post.postId === selectedComment?.postId)
-      post.comments.splice(0, 0, comment)
-      post.commentsCount = post.commentsCount + 1
+      prev.comments.unshift(comment)
+      prev.commentsCount += 1
       return prev
     })
     setComment_Val('')
@@ -62,19 +69,25 @@ function PostRightBar ({ classname }) {
     commentBox.style.height = `10px`
     commentBox.style.height = `${commentBox.scrollHeight}px`
   }
-  useEffect(() => {
-    const post = posts.find(post => post.postId === selectedComment?.postId)
-    setUserComments(post?.comments)
-  }, [selectedComment, posts])
+
+  const loadMoreComments = () => {
+    getComments(commentBox.postId, commentBox.lastCommentDate).then(result => {
+      setCommentBox(prev => {
+        prev = cloneDeep(prev)
+        prev.comments.push(...result)
+        prev.lastCommentDate = result.at(-1)?.createdAt
+        return prev
+      })
+    })
+  }
+
   return (
     <div
-      className={`w-[30%] bg-white sticky top-[50px] ${
-        selectedComment ? `h-[400px]` : `h-0`
-      } transition-all rounded-xl shadow-lg ${classname} overflow-y-auto`}
+      className={`h-[95%] w-full bg-white transition-all rounded-xl shadow-lg ${classname}`}
     >
       <form
         onSubmit={handleSubmitComment}
-        className=' flex items-start justify-around p-2 sticky top-0 bg-white z-10'
+        className='flex items-start justify-around px-2 bg-white'
       >
         <Avatar url={user?.imageUrl} className={`w-8 h-8`} />
         <textarea
@@ -89,17 +102,32 @@ function PostRightBar ({ classname }) {
           Submit
         </button>
       </form>
-      {userComments?.map(comment => (
-        <div className='flex items-start justify-start mb-4 ml-2'>
+      <section className='h-[calc(100%-48px)] pt-2 overflow-y-auto'>
+      {commentBox.comments?.map(comment => (
+        <div
+          className='flex items-start justify-start mb-4 ml-2'
+          key={comment.commentId}
+        >
           <Avatar url={comment.creator?.user_img} className={`h-8 w-8 mr-2`} />
           <div className='px-2 rounded bg-stone-200'>
-            <h1 className='text-slate-600 text-sm'>{comment.creator.user_name}</h1>
+            <h1 className='text-slate-600 text-sm'>
+              {comment.creator.user_name}
+            </h1>
             <p>{comment.comment}</p>
           </div>
         </div>
       ))}
+      {commentBox.comments.length < commentBox.commentsCount ? (
+        <button
+          className='px-2 py-1 bg-indigo-500 hover:bg-indigo-600 rounded text-white ml-3'
+          onClick={loadMoreComments}
+        >
+          Load more
+        </button>
+      ) : null}
+      </section>
     </div>
   )
 }
 
-export default PostRightBar
+export default CommentsSection

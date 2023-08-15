@@ -8,6 +8,7 @@ import {
   getDoc,
   getDocs,
   increment,
+  limit,
   orderBy,
   query,
   serverTimestamp,
@@ -16,6 +17,8 @@ import {
 } from 'firebase/firestore'
 import { cloneDeep, result } from 'lodash'
 import { useContext, useEffect, useState } from 'react'
+import { LocalContext } from '../Post'
+import { getComments } from '@/functions/getComments'
 
 const notLiked = 'https://cdn-icons-png.flaticon.com/512/2107/2107956.png'
 const liked = 'https://cdn-icons-png.flaticon.com/512/2107/2107783.png'
@@ -24,8 +27,12 @@ const share = 'https://cdn-icons-png.flaticon.com/512/2958/2958783.png'
 
 function PostEngage ({ post }) {
   const [hasLiked, setHasLiked] = useState(false)
+
   const { setPosts, setSelectedComment, selectedComment } = useContext(Appstate)
+  const { setCommentBox, commentBox } = useContext(LocalContext)
+
   const { user, isLoaded } = useUser()
+
   const fetchEngageInfo = async (postId, userId) => {
     const hasUserLiked = await getDoc(
       doc(firestoreDB, `posts/${postId}/likes/${userId}`)
@@ -35,20 +42,7 @@ function PostEngage ({ post }) {
     }
     return false
   }
-  const getComments = async postId => {
-    if (!postId) return []
-    const local_comments = []
-    const commentsQuery = query(
-      collection(firestoreDB, `posts/${postId}/comments`),
-      orderBy('createdAt', 'desc')
-    )
-    const comments = await getDocs(commentsQuery)
-    comments.docs.forEach(comment => {
-      local_comments.push(comment.data())
-    })
-    console.log(local_comments)
-    return local_comments
-  }
+
   const incrementLike = val => {
     setPosts(prev => {
       prev = cloneDeep(prev)
@@ -59,37 +53,23 @@ function PostEngage ({ post }) {
       return prev
     })
   }
+
   const handleComment = () => {
-    const local_comments = []
-    if (!selectedComment) {
-      console.log(post)
-      if (!post.comments) {
-        getComments(post.postId)
-          .then(comments => {
-            local_comments.push(...comments)
-            setPosts(prev => {
-              prev = cloneDeep(prev)
-              const selectedPost = prev.find(
-                post_prev => post_prev.postId === post.postId
-              )
-              selectedPost.comments = comments
-              console.log(prev)
-              return prev
-            })
-          })
-          .then(() => {
-            setSelectedComment({
-              postId: post.postId,
-              comments: local_comments
-            })
-          })
-      } else {
-        setSelectedComment({ postId: post.postId, comments: post.comments })
-      }
-    } else {
-      setSelectedComment(null)
+    setCommentBox(prev => ({ ...prev, state: !prev.state }))
+    if (!commentBox.fetched) {
+      getComments(commentBox.postId, commentBox.lastCommentDate).then(
+        result => {
+          setCommentBox(prev => ({
+            ...prev,
+            comments: result,
+            fetched: true,
+            lastCommentDate: result.at(-1)?.createdAt
+          }))
+        }
+      )
     }
   }
+
   const handleLike = () => {
     fetchEngageInfo(post.postId, user.id).then(result => {
       if (result) {
@@ -157,7 +137,7 @@ const EngageIcon = ({
 }) => {
   return (
     <div
-      className='flex w-[25%] py-1 px-1 rounded justify-center items-center cursor-pointer hover:bg-slate-100'
+      className='flex w-[25%] py-1 px-1 rounded justify-center items-center cursor-pointer hover:bg-slate-100 select-none'
       onClick={e => {
         onClick(e)
         e.stopPropagation()

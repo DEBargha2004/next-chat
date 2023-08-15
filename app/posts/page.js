@@ -11,15 +11,19 @@ import { getImage } from '@/functions/getImage'
 import { Appstate } from '@/hooks/context'
 import { collection, getDocs, orderBy, query } from 'firebase/firestore'
 import { useContext, useEffect, useState } from 'react'
-import PostRightBar from '@/components/Posts/PostRightBar'
+import CommentsSection from '@/components/Posts/CommentsSection'
 import PostLeftBar from '@/components/Posts/PostLeftBar'
+import Post from '@/components/Post'
 
 function page () {
   const { posts, setPosts } = useContext(Appstate)
 
   async function getPosts () {
     setPosts([])
-    const postsQuery = query(collection(firestoreDB, `posts`),orderBy('createdAt','desc'))
+    const postsQuery = query(
+      collection(firestoreDB, `posts`),
+      orderBy('createdAt', 'desc')
+    )
     const posts_firestore = await getDocs(postsQuery)
     for (const doc of posts_firestore.docs) {
       const post = doc.data()
@@ -31,26 +35,13 @@ function page () {
     getPosts()
   }, [])
   return (
-    <div className='w-[calc(100%-80px)] h-full flex items-start justify-around overflow-auto'>
-    <PostLeftBar />
+    <div className='w-[calc(100%-80px)] h-full flex items-start justify-around overflow-auto pt-[100px]'>
+      {/* <PostLeftBar /> */}
       <div className='w-[35%] '>
         {posts.map(post => {
-          return (
-            <PostWrapper className={`w-full my-3`}>
-              <PostCreation createdAt={post.createdAt} creator={post.creator} />
-              <PostDescription description={post.postDescription} />
-              <PostImage address={post.postImageAddress} className={``} />
-              <PostAppreciations
-                commentsCount={post.commentsCount}
-                likesCount={post.likesCount}
-                shareCount={post.shareCount}
-              />
-              <PostEngage post={post} />
-            </PostWrapper>
-          )
+          return <Post post={post} key={post.postId} />
         })}
       </div>
-      <PostRightBar />
     </div>
   )
 }
