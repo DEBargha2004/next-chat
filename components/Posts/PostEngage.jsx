@@ -1,22 +1,30 @@
 import { firestoreDB } from '@/firebase.config'
+import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
 import {
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   increment,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc
 } from 'firebase/firestore'
-import { result } from 'lodash'
-import { useEffect, useState } from 'react'
+import { cloneDeep, result } from 'lodash'
+import { useContext, useEffect, useState } from 'react'
 
 const notLiked = 'https://cdn-icons-png.flaticon.com/512/2107/2107956.png'
 const liked = 'https://cdn-icons-png.flaticon.com/512/2107/2107783.png'
+const comment = 'https://cdn-icons-png.flaticon.com/512/3114/3114810.png'
+const share = 'https://cdn-icons-png.flaticon.com/512/2958/2958783.png'
 
 function PostEngage ({ post }) {
   const [hasLiked, setHasLiked] = useState(false)
+  const { setPosts, setSelectedComment, selectedComment } = useContext(Appstate)
   const { user, isLoaded } = useUser()
   const fetchEngageInfo = async (postId, userId) => {
     const hasUserLiked = await getDoc(
@@ -27,10 +35,66 @@ function PostEngage ({ post }) {
     }
     return false
   }
+  const getComments = async postId => {
+    if (!postId) return []
+    const local_comments = []
+    const commentsQuery = query(
+      collection(firestoreDB, `posts/${postId}/comments`),
+      orderBy('createdAt', 'desc')
+    )
+    const comments = await getDocs(commentsQuery)
+    comments.docs.forEach(comment => {
+      local_comments.push(comment.data())
+    })
+    console.log(local_comments)
+    return local_comments
+  }
+  const incrementLike = val => {
+    setPosts(prev => {
+      prev = cloneDeep(prev)
+      const selectedPost = prev.find(
+        post_prev => post_prev.postId === post.postId
+      )
+      selectedPost.likesCount = selectedPost.likesCount + val
+      return prev
+    })
+  }
+  const handleComment = () => {
+    const local_comments = []
+    if (!selectedComment) {
+      console.log(post)
+      if (!post.comments) {
+        getComments(post.postId)
+          .then(comments => {
+            local_comments.push(...comments)
+            setPosts(prev => {
+              prev = cloneDeep(prev)
+              const selectedPost = prev.find(
+                post_prev => post_prev.postId === post.postId
+              )
+              selectedPost.comments = comments
+              console.log(prev)
+              return prev
+            })
+          })
+          .then(() => {
+            setSelectedComment({
+              postId: post.postId,
+              comments: local_comments
+            })
+          })
+      } else {
+        setSelectedComment({ postId: post.postId, comments: post.comments })
+      }
+    } else {
+      setSelectedComment(null)
+    }
+  }
   const handleLike = () => {
     fetchEngageInfo(post.postId, user.id).then(result => {
       if (result) {
         setHasLiked(false)
+        incrementLike(-1)
         deleteDoc(
           doc(firestoreDB, `posts/${post.postId}/likes/${user.id}`)
         ).then(() => {
@@ -40,6 +104,7 @@ function PostEngage ({ post }) {
         })
       } else {
         setHasLiked(true)
+        incrementLike(1)
         setDoc(doc(firestoreDB, `posts/${post.postId}/likes/${user.id}`), {
           user_id: user.id,
           likedAt: serverTimestamp()
@@ -51,11 +116,13 @@ function PostEngage ({ post }) {
       }
     })
   }
+
   useEffect(() => {
     fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
   }, [isLoaded])
+
   return (
-    <div className='w-full mx-4 flex items-center justify-between my-2'>
+    <div className='w-full flex items-center justify-around my-2'>
       <EngageIcon
         bool={hasLiked}
         url={notLiked}
@@ -63,6 +130,16 @@ function PostEngage ({ post }) {
         conditionalUrl={liked}
         onClick={() => handleLike()}
         conditionalLabel={'Unlike'}
+      />
+      <EngageIcon
+        url={comment}
+        label={`Comment`}
+        onClick={() => handleComment()}
+      />
+      <EngageIcon
+        url={share}
+        label={`Share`}
+        onClick={() => console.log('share')}
       />
     </div>
   )

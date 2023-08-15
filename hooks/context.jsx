@@ -28,6 +28,8 @@ export function GlobalAppStateProvider ({ children }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [referenceMessage, setReferenceMessage] = useState(null)
   const [imageInfo, setImageInfo] = useState({ url: null, info: null })
+  const [posts, setPosts] = useState([])
+  const [selectedComment, setSelectedComment] = useState(null)
 
   const refMessageInfo = useMemo(() => {
     const sender_id = referenceMessage?.sender_id
@@ -108,7 +110,11 @@ export function GlobalAppStateProvider ({ children }) {
         groups,
         setGroups,
         setSelectedGroup,
-        selectedGroup
+        selectedGroup,
+        posts,
+        setPosts,
+        selectedComment,
+        setSelectedComment
       }}
     >
       {children}
