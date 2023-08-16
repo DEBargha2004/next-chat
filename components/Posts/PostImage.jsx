@@ -8,8 +8,8 @@ function PostImage({address,className}) {
         getImage(address).then(downloadedUrl => setUrl(downloadedUrl))
     },[address])
   return (
-    <div className={`w-full p-1 border-y border-[#00000056] ${className}`}>
-        <img src={url} className="w-full" alt="" />
+    <div className={`w-full p-1 border-y border-[#00000056] h-[400px] ${className}`}>
+        <img src={url} className="w-full h-full object-contain" alt="" />
     </div>
   )
 }

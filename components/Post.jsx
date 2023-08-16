@@ -6,6 +6,7 @@ import PostAppreciations from './Posts/PostAppreciations'
 import PostEngage from './Posts/PostEngage'
 import CommentsSection from './Posts/CommentsSection'
 import { createContext, useState } from 'react'
+import PostRef from './Posts/PostRef'
 
 export const LocalContext = createContext()
 
@@ -30,8 +31,9 @@ function Post ({ post }) {
           <PostCreation createdAt={post.createdAt} creator={post.creator} />
           <PostDescription description={post.postDescription} />
           {post.postImageAddress ? (
-            <PostImage address={post.postImageAddress} className={``} />
+            <PostImage address={post.postImageAddress} className={`max-h-[500px]`} />
           ) : null}
+          <PostRef postref={post.postref} />
           <PostAppreciations
             commentsCount={commentBox.commentsCount}
             likesCount={post.likesCount}

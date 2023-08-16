@@ -3,10 +3,11 @@ import man from '../public/man.jpeg'
 import { useEffect, useMemo, useState } from 'react'
 import { getImage } from '@/functions/getImage'
 import { useUser } from '@clerk/nextjs'
+import { twMerge } from 'tailwind-merge'
 
 const icons = { group: `https://cdn-icons-png.flaticon.com/512/33/33308.png` }
 
-function Avatar ({ url, online, className, group, address, id }) {
+function Avatar ({ url, online, className, group, address, id,h,w }) {
   const [processedUrl, setProcessedUrl] = useState('')
   const { user } = useUser()
 
@@ -21,11 +22,11 @@ function Avatar ({ url, online, className, group, address, id }) {
   return (
     <div className='flex relative'>
       <Image
-        height={60}
-        width={60}
+        height={h || 60}
+        width={w || 60}
         src={processedUrl ? processedUrl : url ? url : icons.group}
         // src={url ? url : noProfile()}
-        className={`h-12 w-12 object-cover rounded-full ${className}`}
+        className={twMerge(`h-12 w-12 object-cover rounded-full`, `h-[${h}px] w-[${w}px]`)}
         alt='groupImage'
       />
       {online && id !== user?.id ? (

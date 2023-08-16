@@ -1,4 +1,4 @@
-import { firestoreDB } from '@/firebase.config'
+import { contentDB, firestoreDB } from '@/firebase.config'
 import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
 import {
@@ -15,10 +15,13 @@ import {
   setDoc,
   updateDoc
 } from 'firebase/firestore'
+import { v4 } from 'uuid'
 import { cloneDeep, result } from 'lodash'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { LocalContext } from '../Post'
 import { getComments } from '@/functions/getComments'
+import { getImage } from '@/functions/getImage'
+import { ref, uploadBytes } from 'firebase/storage'
 
 const notLiked = 'https://cdn-icons-png.flaticon.com/512/2107/2107956.png'
 const liked = 'https://cdn-icons-png.flaticon.com/512/2107/2107783.png'
@@ -27,11 +30,16 @@ const share = 'https://cdn-icons-png.flaticon.com/512/2958/2958783.png'
 
 function PostEngage ({ post }) {
   const [hasLiked, setHasLiked] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const { setPosts, setSelectedComment, selectedComment } = useContext(Appstate)
   const { setCommentBox, commentBox } = useContext(LocalContext)
 
   const { user, isLoaded } = useUser()
+
+  const [shareInfo, setShareInfo] = useState({ desc: '', file: null, url: '' })
+  const [imageUrl,setImageUrl] = useState('')
+  const shareDialogRef = useRef(null)
 
   const fetchEngageInfo = async (postId, userId) => {
     const hasUserLiked = await getDoc(
@@ -53,6 +61,12 @@ function PostEngage ({ post }) {
       return prev
     })
   }
+
+  useEffect(()=>{
+    post?.postImageAddress && getImage(post.postImageAddress).then(result => {
+      setImageUrl(result)
+    })
+  },[])
 
   const handleComment = () => {
     setCommentBox(prev => ({ ...prev, state: !prev.state }))
@@ -97,8 +111,75 @@ function PostEngage ({ post }) {
     })
   }
 
+  const handleShare = post => {
+    shareDialogRef.current.showModal()
+    console.log(post);
+  }
+
+  const handleSubmitShare = async post => {
+    if (uploading) return
+    if (!shareInfo.desc && !shareInfo.file) return
+    setUploading(true)
+    console.log(uploading);
+    const postId = v4()
+    const postImageAddress = v4()
+    const createdAt = serverTimestamp()
+    const postDescription = shareInfo.desc
+    const creator = {
+      user_id: user?.id,
+      user_name: user?.fullName,
+      user_email: user?.primaryEmailAddress.emailAddress,
+      user_img: user?.imageUrl
+    }
+    const postref = {
+      creator: post.creator,
+      createdAt: post.createdAt,
+      description: post.postDescription,
+      imageAddress: post.postImageAddress
+    }
+    const likesCount = 0
+    const commentsCount = 0
+    const shareCount = 0
+    const postInfo = {
+      postId,
+      createdAt,
+      postDescription,
+      postImageAddress,
+      creator,
+      likesCount,
+      commentsCount,
+      shareCount,
+      postref
+    }
+
+    console.log(postInfo,post);
+
+    !shareInfo.file && delete postInfo.postImageAddress
+    !shareInfo.desc && delete postInfo.postDescription
+
+    shareInfo.file &&
+      (await uploadBytes(ref(contentDB, postImageAddress), shareInfo.file))
+    await setDoc(doc(firestoreDB, `posts/${postId}`), postInfo)
+
+    setShareInfo(prev => ({ ...prev, desc: '', file: null, url: '' }))
+    setUploading(false)
+    shareDialogRef.current.close()
+  }
+
+  const handleShareFileChange = e => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      setShareInfo(prev => ({
+        ...prev,
+        file: e.target.files[0],
+        url: reader.result
+      }))
+    }
+    reader.readAsDataURL(e.target.files[0])
+  }
+
   useEffect(() => {
-    fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
+    post && fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
   }, [isLoaded])
 
   return (
@@ -119,8 +200,32 @@ function PostEngage ({ post }) {
       <EngageIcon
         url={share}
         label={`Share`}
-        onClick={() => console.log('share')}
+        onClick={() => handleShare(post)}
       />
+      <dialog  ref={shareDialogRef}>
+        <img src={imageUrl} className='w-[450px]' alt='' />
+        <p>{post?.postDescription}</p>
+        <input type='file' onChange={handleShareFileChange} accept='image/*' />
+        <img src={shareInfo.url} className='w-[450px]' alt='' />
+        <textarea
+          value={shareInfo.desc}
+          onChange={e =>
+            setShareInfo(prev => ({ ...prev, desc: e.target.value }))
+          }
+        ></textarea>
+        <button
+          className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
+          onClick={() => handleSubmitShare(post)}
+        >
+          RePost
+        </button>
+        <button
+          className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
+          onClick={() => shareDialogRef.current.close()}
+        >
+          Close
+        </button>
+      </dialog>
     </div>
   )
 }
