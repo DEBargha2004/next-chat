@@ -33,12 +33,12 @@ function PostEngage ({ post }) {
   const [uploading, setUploading] = useState(false)
 
   const { setPosts, setSelectedComment, selectedComment } = useContext(Appstate)
-  const { setCommentBox, commentBox } = useContext(LocalContext)
+  const { setCommentBox, commentBox, setHeight } = useContext(LocalContext)
 
   const { user, isLoaded } = useUser()
 
   const [shareInfo, setShareInfo] = useState({ desc: '', file: null, url: '' })
-  const [imageUrl,setImageUrl] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const shareDialogRef = useRef(null)
 
   const fetchEngageInfo = async (postId, userId) => {
@@ -62,14 +62,18 @@ function PostEngage ({ post }) {
     })
   }
 
-  useEffect(()=>{
-    post?.postImageAddress && getImage(post.postImageAddress).then(result => {
-      setImageUrl(result)
-    })
-  },[])
+  useEffect(() => {
+    post?.postImageAddress &&
+      getImage(post.postImageAddress).then(result => {
+        setImageUrl(result)
+      })
+  }, [])
 
   const handleComment = () => {
     setCommentBox(prev => ({ ...prev, state: !prev.state }))
+    if (commentBox.state) {
+      setHeight(prev => ({ ...prev, value: '', expanded: false }))
+    }
     if (!commentBox.fetched) {
       getComments(commentBox.postId, commentBox.lastCommentDate).then(
         result => {
@@ -113,17 +117,18 @@ function PostEngage ({ post }) {
 
   const handleShare = post => {
     shareDialogRef.current.showModal()
-    console.log(post);
+    console.log(post)
   }
 
   const handleSubmitShare = async post => {
     if (uploading) return
     if (!shareInfo.desc && !shareInfo.file) return
     setUploading(true)
-    console.log(uploading);
+    console.log(uploading)
     const postId = v4()
     const postImageAddress = v4()
     const createdAt = serverTimestamp()
+    console.log(postId,postImageAddress);
     const postDescription = shareInfo.desc
     const creator = {
       user_id: user?.id,
@@ -137,6 +142,7 @@ function PostEngage ({ post }) {
       description: post.postDescription,
       imageAddress: post.postImageAddress
     }
+    !post.postImageAddress && delete postref.imageAddress
     const likesCount = 0
     const commentsCount = 0
     const shareCount = 0
@@ -152,7 +158,7 @@ function PostEngage ({ post }) {
       postref
     }
 
-    console.log(postInfo,post);
+    console.log(postInfo, post)
 
     !shareInfo.file && delete postInfo.postImageAddress
     !shareInfo.desc && delete postInfo.postDescription
@@ -160,10 +166,27 @@ function PostEngage ({ post }) {
     shareInfo.file &&
       (await uploadBytes(ref(contentDB, postImageAddress), shareInfo.file))
     await setDoc(doc(firestoreDB, `posts/${postId}`), postInfo)
+    await updateDoc(doc(firestoreDB, `posts/${post.postId}`), {
+      shareCount: increment(1)
+    })
+    setPosts(prev => {
+      prev = cloneDeep(prev)
+      const selectedPost = prev.find(
+        post_prev => post_prev.postId === post.postId
+      )
+      selectedPost.shareCount += 1
+      return prev
+    })
 
     setShareInfo(prev => ({ ...prev, desc: '', file: null, url: '' }))
     setUploading(false)
     shareDialogRef.current.close()
+    setPosts(prev => {
+      prev = cloneDeep(prev)
+      postInfo.createdAt.seconds = Date.now()/1000
+      prev.unshift(postInfo)
+      return prev
+    })
   }
 
   const handleShareFileChange = e => {
@@ -179,7 +202,8 @@ function PostEngage ({ post }) {
   }
 
   useEffect(() => {
-    post && fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
+    post &&
+      fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
   }, [isLoaded])
 
   return (
@@ -202,29 +226,50 @@ function PostEngage ({ post }) {
         label={`Share`}
         onClick={() => handleShare(post)}
       />
-      <dialog  ref={shareDialogRef}>
-        <img src={imageUrl} className='w-[450px]' alt='' />
-        <p>{post?.postDescription}</p>
-        <input type='file' onChange={handleShareFileChange} accept='image/*' />
-        <img src={shareInfo.url} className='w-[450px]' alt='' />
-        <textarea
-          value={shareInfo.desc}
-          onChange={e =>
-            setShareInfo(prev => ({ ...prev, desc: e.target.value }))
-          }
-        ></textarea>
-        <button
-          className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
-          onClick={() => handleSubmitShare(post)}
-        >
-          RePost
-        </button>
-        <button
-          className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
-          onClick={() => shareDialogRef.current.close()}
-        >
-          Close
-        </button>
+      <dialog ref={shareDialogRef} className='p-3 rounded-xl ' open={false}>
+        <div className='flex flex-col items-start justify-between'>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              className='w-[400px] h-[400px] object-contain'
+              alt=''
+            />
+          ) : null}
+          <p>{post?.postDescription}</p>
+          <input
+            type='file'
+            onChange={handleShareFileChange}
+            accept='image/*'
+          />
+          {shareInfo.url ? (
+            <img
+              src={shareInfo.url}
+              className='w-[400px] h-[400px] object-contain'
+              alt=''
+            />
+          ) : null}
+          <textarea
+            value={shareInfo.desc}
+            className='shrink-0 resize-none w-[400px] my-2 outline-none rounded-xl border-2 border-slate-400 p-2'
+            onChange={e =>
+              setShareInfo(prev => ({ ...prev, desc: e.target.value }))
+            }
+          ></textarea>
+          <div className='w-full flex justify-between items-center my-2'>
+            <button
+              className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
+              onClick={() => handleSubmitShare(post)}
+            >
+              RePost
+            </button>
+            <button
+              className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded text-white'
+              onClick={() => shareDialogRef.current.close()}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </dialog>
     </div>
   )

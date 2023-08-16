@@ -18,7 +18,7 @@ export const getComments = async (postId, startAfterDate) => {
     )
   }
   const comments = await getDocs(commentsQuery)
-  comments.docs.forEach(comment => {
+  comments.docs?.forEach(comment => {
     local_comments.push(comment.data())
   })
 

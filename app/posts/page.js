@@ -26,6 +26,7 @@ function page () {
       limit(3)
     )
     if (startAfterDate) {
+      console.log('startAfterDate is',startAfterDate);
       postsQuery = query(
         collection(firestoreDB, `posts`),
         orderBy('createdAt', 'desc'),
@@ -39,13 +40,16 @@ function page () {
       const post = doc.data()
       local_storage.push(post)
     }
+    fetching.current = false
     return local_storage
   }
 
   const handleScroll = e => {
     const scrollBottom =
       e.target.scrollHeight - e.target.scrollTop - window.innerHeight
-    if (scrollBottom < 100) {
+      console.log(scrollBottom);
+    if (scrollBottom <= 100) {
+      
       if (!fetching.current) {
         fetching.current = true
         getPosts(posts.at(-1)?.createdAt).then(result => {
@@ -71,6 +75,7 @@ function page () {
       className='w-[calc(100%-80px)] h-full flex items-start justify-around overflow-auto pt-[100px]'
       ref={postSectionRef}
       onScroll={handleScroll}
+      id='postSection'
     >
       {/* <PostLeftBar /> */}
       <div className='w-[35%]'>
