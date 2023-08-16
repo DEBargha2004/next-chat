@@ -1,45 +1,81 @@
 'use client'
 
-import PostAppreciations from '@/components/Posts/PostAppreciations'
-import PostCreation from '@/components/Posts/PostCreation'
-import PostDescription from '@/components/Posts/PostDescription'
-import PostEngage from '@/components/Posts/PostEngage'
-import PostImage from '@/components/Posts/PostImage'
-import PostWrapper from '@/components/Posts/PostWrapper'
 import { firestoreDB } from '@/firebase.config'
-import { getImage } from '@/functions/getImage'
 import { Appstate } from '@/hooks/context'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
-import { useContext, useEffect, useState } from 'react'
-import CommentsSection from '@/components/Posts/CommentsSection'
-import PostLeftBar from '@/components/Posts/PostLeftBar'
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  startAfter
+} from 'firebase/firestore'
+import { useContext, useEffect, useRef } from 'react'
 import Post from '@/components/Post'
 
 function page () {
-  const { posts, setPosts } = useContext(Appstate)
+  const { posts, setPosts,lastPost } = useContext(Appstate)
+  const postSectionRef = useRef(null)
+  const fetching = useRef(false)
 
-  async function getPosts () {
-    setPosts([])
-    const postsQuery = query(
+  async function getPosts (startAfterDate) {
+    console.log(startAfterDate)
+    let postsQuery = query(
       collection(firestoreDB, `posts`),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(3)
     )
+    if (startAfterDate) {
+      postsQuery = query(
+        collection(firestoreDB, `posts`),
+        orderBy('createdAt', 'desc'),
+        limit(3),
+        startAfter(startAfterDate)
+      )
+    }
+    const local_storage = []
     const posts_firestore = await getDocs(postsQuery)
     for (const doc of posts_firestore.docs) {
       const post = doc.data()
-      setPosts(prev => [...prev, post])
+      local_storage.push(post)
+    }
+    return local_storage
+  }
+
+  const handleScroll = e => {
+    const scrollBottom =
+      e.target.scrollHeight - e.target.scrollTop - window.innerHeight
+    if (scrollBottom < 100) {
+      if (!fetching.current) {
+        fetching.current = true
+        getPosts(posts.at(-1)?.createdAt).then(result => {
+          lastPost.current = result.at(-1)
+          setPosts(prev => [...prev,...result])
+        })
+      }
     }
   }
 
   useEffect(() => {
-    getPosts()
+    !lastPost.current && getPosts().then(result => {
+      setPosts(prev => {
+        lastPost.current = result.at(-1)
+        console.log(result)
+        console.log(lastPost.current);
+        return [...prev, ...result]
+      })
+    })
   }, [])
   return (
-    <div className='w-[calc(100%-80px)] h-full flex items-start justify-around overflow-auto pt-[100px]'>
+    <div
+      className='w-[calc(100%-80px)] h-full flex items-start justify-around overflow-auto pt-[100px]'
+      ref={postSectionRef}
+      onScroll={handleScroll}
+    >
       {/* <PostLeftBar /> */}
-      <div className='w-[35%] '>
-        {posts.map(post => {
-          return <Post post={post} key={post.postId} />
+      <div className='w-[35%]'>
+        {posts.map((post, index) => {
+          return <Post post={post} key={index} />
         })}
       </div>
     </div>

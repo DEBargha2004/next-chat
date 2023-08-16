@@ -1,5 +1,5 @@
-import { firestoreDB } from "@/firebase.config";
-import { info } from "autoprefixer";
+import { firestoreDB } from '@/firebase.config'
+import { info } from 'autoprefixer'
 import {
   query,
   collection,
@@ -10,8 +10,8 @@ import {
   onSnapshot,
   arrayUnion,
   where,
-  getDocs,
-} from "firebase/firestore";
+  getDocs
+} from 'firebase/firestore'
 
 export const setUpSubCollectionListener = async ({
   conversation_info,
@@ -24,17 +24,16 @@ export const setUpSubCollectionListener = async ({
       firestoreDB,
       `conversations/${conversation_info.conversation_id}/messages`
     ),
-    orderBy("message_createdAt")
-  );
+    orderBy('message_createdAt')
+  )
 
-  const unsub = onSnapshot(mquery, async (snapshots) => {
-    const messages = [];
+  const unsub = onSnapshot(mquery, async snapshots => {
+    const messages = []
 
     await Promise.all(
-      snapshots.docs.map(async (snapshot) => {
+      snapshots.docs.map(async snapshot => {
         // dealing with subcollection
         // its necessary to add docs
-        if(snapshot.data().messageId === '7a836af4-a46f-4689-b7dd-95a8dcc9346e') console.log(snapshot.data())
         if (
           !snapshot.data().delivered_to?.includes(user?.id) &&
           snapshot.data().sender_id !== user.id
@@ -50,51 +49,29 @@ export const setUpSubCollectionListener = async ({
             {
               message_deliver: true,
               message_deliveredAt: serverTimestamp(),
-              delivered_to: arrayUnion(user.id),
+              delivered_to: arrayUnion(user.id)
             }
-          );
+          )
         }
-        messages.push(snapshot.data());
+        messages.push(snapshot.data())
       })
-    );
-    let group_id;
-    let groupInfo;
-    let participants= [];
-    if (conversation_info.type === "group") {
-      // const gquery = query(
-      //   collection(firestoreDB, `groups`),
-      //   where("id", "==", `group_${conversation_info.conversation_id}`)
-      // );
-      // const info = await getDocs(gquery);
-      // console.log(info.docs);
-      // info.docs.forEach(snapshot => {
-      //   groupInfo = snapshot.data()
-      //   group_id = groupInfo.id
-      // })
-      // const group_Participants = await getDocs(collection(firestoreDB,`groups/${group_id}/participants`))
-      // group_Participants.docs.forEach(participant => {
-      //   participants.push(participant.data())
-      // })
-      // groupInfo.participants = participants
-      // setGroups(prev => ([...prev,groupInfo]))
-
-      // console.log(group_id,messages);
-
+    )
+    let group_id
+    if (conversation_info.type === 'group') {
       group_id = `group_${conversation_info.conversation_id}`
     }
-    
 
     let friend_id = conversation_info.participants?.find(
-      (participant_id) => participant_id !== user.id
-    );
+      participant_id => participant_id !== user.id
+    )
 
-    setMessages((prev) => {
+    setMessages(prev => {
       return {
         ...prev,
-        [group_id || friend_id]: messages,
-      };
-    });
-  });
+        [group_id || friend_id]: messages
+      }
+    })
+  })
 
-  return unsub;
-};
+  return unsub
+}

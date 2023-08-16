@@ -3,7 +3,6 @@ import PostDescription from './PostDescription'
 import PostImage from './PostImage'
 
 function PostRef ({ postref }) {
-  console.log(postref)
   return (
     <>
       {postref ? (

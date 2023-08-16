@@ -83,7 +83,7 @@ function CommentsSection ({ classname }) {
 
   return (
     <div
-      className={`h-[95%] w-full bg-white transition-all rounded-xl shadow-lg ${classname}`}
+      className={`h-[95%] max-h-[600px] w-full bg-white transition-all rounded-xl shadow-lg shadow-[#0000005e] ${classname}`}
     >
       <form
         onSubmit={handleSubmitComment}

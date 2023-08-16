@@ -70,7 +70,6 @@ export async function updateFriends ({
 
   let friend_id = participants.find(id => id !== user.id)
   // let friend_ids = participants.filter(participant => )
-  console.log(participants)
 
   // Set up the listener for presence
   updatePresenceStatus({ setPresenceInfo, id: friend_id })

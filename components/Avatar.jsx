@@ -26,7 +26,7 @@ function Avatar ({ url, online, className, group, address, id,h,w }) {
         width={w || 60}
         src={processedUrl ? processedUrl : url ? url : icons.group}
         // src={url ? url : noProfile()}
-        className={twMerge(`h-12 w-12 object-cover rounded-full`, `h-[${h}px] w-[${w}px]`)}
+        className={`h-12 w-12 object-cover rounded-full ${className}`}
         alt='groupImage'
       />
       {online && id !== user?.id ? (

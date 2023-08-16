@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { createContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useEffect, useMemo, useRef, useState } from 'react'
 
 export const Appstate = createContext()
 
@@ -30,6 +30,7 @@ export function GlobalAppStateProvider ({ children }) {
   const [imageInfo, setImageInfo] = useState({ url: null, info: null })
   const [posts, setPosts] = useState([])
   const [selectedComment, setSelectedComment] = useState(null)
+  const lastPost = useRef(null)
 
   const refMessageInfo = useMemo(() => {
     const sender_id = referenceMessage?.sender_id
@@ -79,9 +80,6 @@ export function GlobalAppStateProvider ({ children }) {
     setReferenceMessage(null)
   }, [selectedChatUser?.user_id])
 
-  useEffect(() => {
-    let local_participants = []
-  }, [groups])
 
   return (
     <Appstate.Provider
@@ -114,10 +112,13 @@ export function GlobalAppStateProvider ({ children }) {
         posts,
         setPosts,
         selectedComment,
-        setSelectedComment
+        setSelectedComment,
+        lastPost
       }}
     >
       {children}
     </Appstate.Provider>
   )
+
+
 }
