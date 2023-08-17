@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { firestoreDB, realtimeDB } from '../firebase.config'
 import Sidenav from '@/components/Sidenav'
 import { serviceList } from '@/constants/serviceList'
-import { collection, query, onSnapshot } from 'firebase/firestore'
+import { collection, query, onSnapshot, getDocs } from 'firebase/firestore'
 
 import { updateFriends } from '@/functions/updateFriends'
 import { setUpSubCollectionListener } from '@/functions/subCollectionListener'
@@ -27,10 +27,27 @@ export default function AppWrapper ({ children }) {
     setConversationsInfo,
     conversationsInfo,
     setSelectedService,
-    setGroups
+    setGroups,
+    closeFriends,
+    setCloseFriends
   } = useContext(Appstate)
 
   const [connection, setConnection] = useState(false)
+
+  const getFriends = async () => {
+    const docs = await getDocs(
+      collection(firestoreDB, `users/${user?.id}/friends`)
+    )
+    const requiredIds = []
+    docs.docs.forEach(doc => {
+      const seekerId = doc.get('seekerId')
+      const acceptorId = doc.get('acceptorId')
+      const friendId = seekerId === user?.id ? acceptorId : seekerId
+      requiredIds.push(friendId)
+    })
+    requiredIds.push(user?.id)
+    return requiredIds
+  }
 
   useEffect(() => {
     setFriends([])
@@ -106,6 +123,10 @@ export default function AppWrapper ({ children }) {
         unsub_subcollection_list.push(unsub_subcollection)
       }
       setConversationsInfo(conversations_info_list)
+    })
+
+    getFriends().then(result => {
+      setCloseFriends(result)
     })
 
     return () => {

@@ -30,7 +30,9 @@ export function GlobalAppStateProvider ({ children }) {
   const [imageInfo, setImageInfo] = useState({ url: null, info: null })
   const [posts, setPosts] = useState([])
   const [selectedComment, setSelectedComment] = useState(null)
+  const [closeFriends, setCloseFriends] = useState([])
   const lastPost = useRef(null)
+  const lastFriend = useRef(null)
 
   const refMessageInfo = useMemo(() => {
     const sender_id = referenceMessage?.sender_id
@@ -80,7 +82,6 @@ export function GlobalAppStateProvider ({ children }) {
     setReferenceMessage(null)
   }, [selectedChatUser?.user_id])
 
-
   return (
     <Appstate.Provider
       value={{
@@ -113,12 +114,13 @@ export function GlobalAppStateProvider ({ children }) {
         setPosts,
         selectedComment,
         setSelectedComment,
-        lastPost
+        lastPost,
+        closeFriends,
+        setCloseFriends,
+        lastFriend
       }}
     >
       {children}
     </Appstate.Provider>
   )
-
-
 }

@@ -15,7 +15,6 @@ export async function POST (request) {
 
   const { excluded } = await request.json()
 
-  console.log(excluded);
 
   const query = searchParams.get('query')
   const userId = searchParams.get('userId')
@@ -23,7 +22,6 @@ export async function POST (request) {
   try {
     const searchResults = await algoliaIndex.search(query)
 
-    console.log(searchResults.hits);
 
     searchResults.hits = searchResults.hits.filter(user => {
       const userExcluded = excluded?.find(
@@ -33,7 +31,6 @@ export async function POST (request) {
       return true
     })
 
-    console.log(searchResults.hits);
 
     const array = await Promise.all(
       searchResults.hits.map(async (user, index) => {

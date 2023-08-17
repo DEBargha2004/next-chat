@@ -1,15 +1,15 @@
 'use client'
 
-import PostWrapper from '@/components/Posts/PostWrapper'
 import Searchbar from '@/components/Searchbar'
 import SearchedPeople from '@/components/SearchedPeople'
 import { useUser } from '@clerk/nextjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function page () {
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
+  const [closeFriends, setCloseFriends] = useState([])
   const handleSearchChange = async e => {
     setSearchQuery(e.target.value)
     let results = await fetch(
@@ -23,9 +23,17 @@ function page () {
     )
 
     results = await results.json()
-    console.log(results);
+    console.log(results)
     setSearchResults(e.target.value ? results.data : [])
   }
+  useEffect(() => {
+    if (!isLoaded) return
+    fetch(`/api/findPeople?userId=${user.id}`)
+      .then(result => result.json())
+      .then(data => {
+        console.log(data);
+        setCloseFriends(data.allFriends.friends)})
+  }, [isLoaded])
   return (
     <main className='w-[calc(100%-80px)] h-full overflow-y-auto'>
       <Searchbar
@@ -38,11 +46,13 @@ function page () {
           return <SearchedPeople data={result} key={result.user_id} />
         })}
       </div>
+      <div className='grid grid-cols-3'>
+        {closeFriends?.map(result => {
+          return <SearchedPeople data={result} key={result.user_id} />
+        })}
+      </div>
     </main>
   )
 }
 
 export default page
-
-
-
