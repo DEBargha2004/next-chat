@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash'
 import { abortImage } from '@/functions/abortImage'
 import { uploadImage } from '@/functions/uploadImage'
 import Image from 'next/image'
+import generateUniqueId from '@/functions/generateUniqueid'
 
 function ChatInput ({ type, width }) {
   const { user } = useUser()
@@ -37,13 +38,6 @@ function ChatInput ({ type, width }) {
     }
     fileReader.readAsDataURL(e.target.files[0])
     userInputRef.current.focus()
-  }
-
-  function generateUinqueid (id1, id2) {
-    const sortedids = [id1, id2].sort().join('-')
-
-    const unique_id = v5(sortedids, v5.DNS)
-    return unique_id
   }
 
   async function addConInfoInUser ({ conversation_id }) {
@@ -133,7 +127,7 @@ function ChatInput ({ type, width }) {
     }
     const conversation_id =
       type !== 'group'
-        ? generateUinqueid(sender_id, receiver_id)
+        ? generateUniqueId(sender_id, receiver_id)
         : selectedGroup.conversation_id
     const message_type = {
       text: userInput ? true : false,

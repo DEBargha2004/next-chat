@@ -141,7 +141,7 @@ function CommentsSection ({ classname }) {
         <Avatar url={user?.imageUrl} className={`w-8 h-8`} />
         <textarea
           value={comment_Val}
-          className=' p-1 resize-none outline-none border border-slate-200 h-12 rounded-lg'
+          className=' p-1 resize-none outline-none border border-slate-200 h-8 rounded-lg'
           onChange={handleTypeComment}
         />
         <button
