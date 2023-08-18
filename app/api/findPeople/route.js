@@ -26,24 +26,26 @@ export async function GET (request) {
 
   const userId = searchParams.get('userId')
   const createdAt = searchParams.get('createdAt')
+  console.log(createdAt);
 
   let friendsQuery
   let friends = []
   if (createdAt) {
+    console.log('createdAt is ',createdAt);
     friendsQuery = query(
       collection(firestoreDB, `users/${userId}/friends`),
-      orderBy('createdAt'),
-      limit(5),
-      startAfter(createdAt)
+      orderBy('createdAt','desc'),
+      limit(10),
     )
   } else {
+    console.log('createdAt',createdAt);
     friendsQuery = query(
       collection(firestoreDB, `users/${userId}/friends`),
-      orderBy('createdAt'),
-      limit(5)
+      orderBy('createdAt','desc'),
+      limit(10)
     )
   }
-
+  console.log(friendsQuery);
   const friends_docs = await getDocs(friendsQuery)
   for (const doc of friends_docs.docs) {
     const seekerId = doc.get('seekerId')

@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/nextjs'
 import PostWrapper from './Posts/PostWrapper'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import generateUniqueId from '@/functions/generateUniqueid'
 import {
   deleteDoc,
@@ -12,15 +12,17 @@ import {
 } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
 import { cloneDeep } from 'lodash'
+import { friendsZone } from '@/app/friends/page'
 
 function SearchedPeople ({ data }) {
   const { user } = useUser()
-  const [userData, setUserData] = useState(data)
+  const { setCloseFriends, searchResults, setSearchResults } =
+    useContext(friendsZone)
 
   const handleAddFriend = async () => {
-    const friendshipId = generateUniqueId(user?.id, userData.user_id)
+    const friendshipId = generateUniqueId(user?.id, data.user_id)
     const friendshipDoc_In_Seeker = await getDoc(
-      doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`)
+      doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`)
     )
     const friendshipDoc_In_Acceptor = await getDoc(
       doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
@@ -32,38 +34,60 @@ function SearchedPeople ({ data }) {
       const friendshipInfo = {
         friendshipId,
         seekerId: user?.id,
-        acceptorId: userData?.user_id,
+        acceptorId: data?.user_id,
         createdAt: serverTimestamp(),
         acceptedAt: null,
         status: `pending`
       }
       await setDoc(
-        doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`),
+        doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`),
         friendshipInfo
       )
       await setDoc(
         doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`),
         friendshipInfo
       )
-      setUserData(prev => {
+
+      setCloseFriends(prev => {
         prev = cloneDeep(prev)
-        prev.friendshipInfo = {
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        if (friend) {
+          friend.friendshipInfo = {
+            ...friendshipInfo,
+            createdAt: { seconds: Date.now() / 1000 }
+          }
+        } else {
+          data.friendshipInfo = friendshipInfo
+          prev.push(data)
+        }
+        return prev
+      })
+
+      setSearchResults(prev => {
+        prev = cloneDeep(prev)
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        friend.friendshipInfo = {
           ...friendshipInfo,
           createdAt: { seconds: Date.now() / 1000 }
         }
+
         return prev
       })
     }
   }
 
   const handleAcceptRequest = async () => {
-    const friendshipId = userData?.friendshipInfo?.friendshipId
-    if (userData?.friendshipInfo.acceptorId === user?.id) {
+    const friendshipId = data?.friendshipInfo?.friendshipId
+    if (data?.friendshipInfo.acceptorId === user?.id) {
       await updateDoc(
-        doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`),
+        doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`),
         {
           status: `accepted`,
-          acceptedAt : serverTimestamp()
+          acceptedAt: serverTimestamp()
         }
       )
       await updateDoc(
@@ -73,52 +97,89 @@ function SearchedPeople ({ data }) {
           acceptedAt: serverTimestamp()
         }
       )
-      setUserData(prev => {
+
+      setCloseFriends(prev => {
         prev = cloneDeep(prev)
-        prev.friendshipInfo.status = `accepted`
-        prev.acceptedAt = { seconds: Date.now() / 1000 }
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        friend.friendshipInfo.status = `accepted`
+        friend.acceptedAt = { seconds: Date.now() / 1000 }
+        return prev
+      })
+      setSearchResults(prev => {
+        prev = cloneDeep(prev)
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        friend.friendshipInfo.status = `accepted`
+        friend.acceptedAt = { seconds: Date.now() / 1000 }
         return prev
       })
     }
   }
 
   const handleRejection = async () => {
-    const friendshipId = userData?.friendshipInfo?.friendshipId
-    if (userData?.friendshipInfo.acceptorId === user?.id) {
+    const friendshipId = data?.friendshipInfo?.friendshipId
+    if (data?.friendshipInfo.acceptorId === user?.id) {
       await deleteDoc(
-        doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`)
+        doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`)
       )
       await deleteDoc(
         doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
       )
-      setUserData(prev => {
+
+      setCloseFriends(prev => {
         prev = cloneDeep(prev)
-        prev.friendshipInfo = {}
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        friend.friendshipInfo = {}
+        return prev
+      })
+      setSearchResults(prev => {
+        prev = cloneDeep(prev)
+        const friend = prev.find(
+          friend_prev => friend_prev.user_id === data.user_id
+        )
+        friend.friendshipInfo = {}
         return prev
       })
     }
   }
 
   const handleBreakUp = async () => {
-    const friendshipId = userData?.friendshipInfo?.friendshipId
+    const friendshipId = data?.friendshipInfo?.friendshipId
     await deleteDoc(
-      doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`)
+      doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`)
     )
     await deleteDoc(
       doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
     )
-    setUserData(prev => {
+
+    setCloseFriends(prev => {
       prev = cloneDeep(prev)
-      prev.friendshipInfo = {}
+      const friend = prev.find(
+        friend_prev => friend_prev.user_id === data.user_id
+      )
+      friend.friendshipInfo = {}
+      return prev
+    })
+    setSearchResults(prev => {
+      prev = cloneDeep(prev)
+      const friend = prev.find(
+        friend_prev => friend_prev.user_id === data.user_id
+      )
+      friend.friendshipInfo = {}
       return prev
     })
   }
 
   const handleCancelRequest = async () => {
-    const friendshipId = userData?.friendshipInfo?.friendshipId
-    if (userData?.seekerId === user?.id) {
+    const friendshipId = data?.friendshipInfo?.friendshipId
+    if (data?.friendshipInfo?.seekerId === user?.id) {
       const friendshipDoc_In_Seeker = await getDoc(
-        doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`)
+        doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`)
       )
       const friendshipDoc_In_Acceptor = await getDoc(
         doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
@@ -129,17 +190,31 @@ function SearchedPeople ({ data }) {
         friendshipDoc_In_Seeker.get('status') === `pending`
       ) {
         await deleteDoc(
-          doc(firestoreDB, `users/${userData?.user_id}/friends/${friendshipId}`)
+          doc(firestoreDB, `users/${data?.user_id}/friends/${friendshipId}`)
         )
         await deleteDoc(
           doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
         )
-        setUserData(prev => {
+
+        setCloseFriends(prev => {
           prev = cloneDeep(prev)
-          prev.friendshipInfo = {}
+          const friend = prev.find(
+            friend_prev => friend_prev.user_id === data.user_id
+          )
+          friend.friendshipInfo = {}
+          return prev
+        })
+        setSearchResults(prev => {
+          prev = cloneDeep(prev)
+          const friend = prev.find(
+            friend_prev => friend_prev.user_id === data.user_id
+          )
+          friend.friendshipInfo = {}
           return prev
         })
       }
+    } else {
+      console.log(data, data?.seekerId, user?.id)
     }
   }
 
@@ -147,12 +222,12 @@ function SearchedPeople ({ data }) {
     <PostWrapper
       className={`p-2 rounded w-fit mx-auto my-3 shadow-lg shadow-[#00000046] hover:scale-105 transition-all`}
     >
-      <img src={userData.user_img} className='h-[150px] rounded' />
-      <h1>{userData.user_name}</h1>
+      <img src={data.user_img} className='h-[150px] rounded' />
+      <h1>{data.user_name}</h1>
       <div>
-        {userData.friendshipInfo.friendshipId ? (
-          userData?.friendshipInfo?.status === `pending` ? (
-            userData.friendshipInfo.acceptorId === user?.id ? (
+        {data.friendshipInfo.friendshipId ? (
+          data?.friendshipInfo?.status === `pending` ? (
+            data.friendshipInfo.acceptorId === user?.id ? (
               <div className='flex'>
                 <button
                   className='w-full py-1 rounded bg-blue-500 hover:bg-blue-600 transition-all text-white text-sm mx-1'

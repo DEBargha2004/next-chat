@@ -1,10 +1,11 @@
 'use client'
 
 import { contentDB, firestoreDB } from '@/firebase.config'
+import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { ref, uploadBytes } from 'firebase/storage'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { v4 } from 'uuid'
 
 function page () {
@@ -14,6 +15,7 @@ function page () {
   const [desc, setDesc] = useState('')
   const [uploading, setUploading] = useState(false)
   const { user } = useUser()
+  const {setPosts} = useContext(Appstate)
 
   const handlePostDescriptionChange = e => {
     const element = postDescriptionRef.current
@@ -72,21 +74,38 @@ function page () {
     setImage(prev => ({ ...prev, file: '', url: '' }))
     setUploading(false)
     postImageRef.current.value = null
+    setPosts(prev => {
+      if(prev?.length){
+        return [post,...prev]
+      }else{
+        return prev
+      }
+    })
   }
   return (
-    <div className='h-full flex items-center justify-center w-[calc(100%-80px)] bg-red-100'>
-      <div className='w-[40%] h-full bg-red-200 transition-all flex flex-col items-center py-10 px-[50px]'>
+    <div className='h-full flex items-center justify-center w-[calc(100%-80px)] overflow-y-auto'>
+      <div className='w-[40%] h-full transition-all flex flex-col items-center py-10 px-[50px]'>
+      <h1 className='text-2xl text-slate-600'>Whtat's on you mind!!</h1>
         <input
           type='file'
           accept='image/*'
           onChange={handleFileChange}
           ref={postImageRef}
+          id='imageInputForPost'
+          hidden
         />
+        <label htmlFor='imageInputForPost'>
+          <img
+            src='https://cdn-icons-png.flaticon.com/512/5175/5175601.png'
+            alt=''
+            className='h-10 cursor-pointer my-5'
+          />
+        </label>
         {image.url ? (
-          <img src={image.url} className='w-[85%] h-[350px] object-cover' />
+          <img src={image.url} className='w-[85%] h-[350px] object-contain my-5' />
         ) : null}
         <textarea
-          className='bg-transparent w-[90%] outline-2 outline-black border-black outline-none rounded-lg h-12 py-3 px-2 overflow-hidden resize-none'
+          className='bg-transparent w-[90%] outline-2 my-5 shrink-0 outline-black border-black outline-none rounded-lg h-12 py-3 px-2 overflow-hidden resize-none'
           ref={postDescriptionRef}
           onChange={handlePostDescriptionChange}
           value={desc}

@@ -62,13 +62,6 @@ function PostEngage ({ post }) {
     })
   }
 
-  useEffect(() => {
-    post?.postImageAddress &&
-      getImage(post.postImageAddress).then(result => {
-        setImageUrl(result)
-      })
-  }, [])
-
   const handleComment = () => {
     setCommentBox(prev => ({ ...prev, state: !prev.state }))
     if (commentBox.state) {
@@ -117,18 +110,17 @@ function PostEngage ({ post }) {
 
   const handleShare = post => {
     shareDialogRef.current.showModal()
-    console.log(post)
   }
 
   const handleSubmitShare = async post => {
     if (uploading) return
     if (!shareInfo.desc && !shareInfo.file) return
     setUploading(true)
-    console.log(uploading)
+
     const postId = v4()
     const postImageAddress = v4()
     const createdAt = serverTimestamp()
-    console.log(postId,postImageAddress);
+
     const postDescription = shareInfo.desc
     const creator = {
       user_id: user?.id,
@@ -158,8 +150,6 @@ function PostEngage ({ post }) {
       postref
     }
 
-    console.log(postInfo, post)
-
     !shareInfo.file && delete postInfo.postImageAddress
     !shareInfo.desc && delete postInfo.postDescription
 
@@ -169,6 +159,7 @@ function PostEngage ({ post }) {
     await updateDoc(doc(firestoreDB, `posts/${post.postId}`), {
       shareCount: increment(1)
     })
+
     setPosts(prev => {
       prev = cloneDeep(prev)
       const selectedPost = prev.find(
@@ -183,9 +174,9 @@ function PostEngage ({ post }) {
     shareDialogRef.current.close()
     setPosts(prev => {
       prev = cloneDeep(prev)
-      postInfo.createdAt.seconds = Date.now()/1000
-      prev.unshift(postInfo)
-      return prev
+      postInfo.createdAt.seconds = Date.now() / 1000
+
+      return [postInfo, ...prev]
     })
   }
 
@@ -202,9 +193,19 @@ function PostEngage ({ post }) {
   }
 
   useEffect(() => {
+    post?.postImageAddress &&
+      getImage(post.postImageAddress).then(result => {
+        setImageUrl(result)
+      })
+  }, [])
+
+  useEffect(() => {
     post &&
-      fetchEngageInfo(post.postId, user?.id).then(result => setHasLiked(result))
-  }, [isLoaded])
+      fetchEngageInfo(post.postId, user?.id).then(result => {
+        console.log(post, result)
+        setHasLiked(result)
+      })
+  }, [isLoaded, user,post])
 
   return (
     <div className='w-full flex items-center justify-around my-2'>

@@ -21,7 +21,7 @@ function page () {
   const fetching = useRef(false)
 
   async function getPosts (startAfterDate) {
-    console.log(startAfterDate)
+    // console.log(startAfterDate)
     let postsQuery = query(
       collection(firestoreDB, `posts`),
       where('creator.user_id', 'in', closeFriends),
@@ -29,7 +29,7 @@ function page () {
       limit(3)
     )
     if (startAfterDate) {
-      console.log('startAfterDate is', startAfterDate)
+      // console.log('startAfterDate is', startAfterDate)
       postsQuery = query(
         collection(firestoreDB, `posts`),
         where('creator.user_id', 'in', closeFriends),
@@ -51,7 +51,7 @@ function page () {
   const handleScroll = e => {
     const scrollBottom =
       e.target.scrollHeight - e.target.scrollTop - window.innerHeight
-    console.log(scrollBottom)
+    // console.log(scrollBottom)
     if (scrollBottom <= 100) {
       if (!fetching.current) {
         fetching.current = true
@@ -69,8 +69,8 @@ function page () {
       getPosts().then(result => {
         setPosts(prev => {
           lastPost.current = result.at(-1)
-          console.log(result)
-          console.log(lastPost.current)
+          // console.log(result)
+          // console.log(lastPost.current)
           return [...prev, ...result]
         })
       })
