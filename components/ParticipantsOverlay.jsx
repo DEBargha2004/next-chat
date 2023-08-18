@@ -100,7 +100,7 @@ export const ParticipantsOverlay = ({
   return (
     <div className='z-10 right-2 top-[50%] -translate-y-[50%] absolute transition-all'>
       <Image
-        src='	https://cdn-icons-png.flaticon.com/512/2311/2311524.png'
+        src='https://cdn-icons-png.flaticon.com/512/2311/2311524.png'
         height={32}
         width={32}
         className='h-8 p-2 rounded-full hover:bg-gray-700 hover:invert'

@@ -22,14 +22,14 @@ function Sidenav ({ className }) {
             />
           ))}
         </div>
-        <div className='flex flex-col items-center justify-between h-[20%]'>
-          <Image
+        <div className='flex flex-col items-center justify-end h-[20%]'>
+          {/* <Image
             height={28}
             width={28}
             src='https://cdn-icons-png.flaticon.com/512/2040/2040504.png'
             alt='settings-icon'
             className='h-7 transition-all hover:rotate-45'
-          />
+          /> */}
           <UserButton />
         </div>
       </div>

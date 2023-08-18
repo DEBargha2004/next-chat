@@ -11,7 +11,7 @@ function PostAppreciations ({ likesCount, commentsCount, shareCount }) {
           <Image
           height={20}
           width={20}
-            src='	https://cdn-icons-png.flaticon.com/512/10407/10407195.png'
+            src='https://cdn-icons-png.flaticon.com/512/10407/10407195.png'
             className='h-5'
             alt=''
           />
