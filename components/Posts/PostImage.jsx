@@ -9,14 +9,14 @@ function PostImage ({ address, className }) {
   }, [address])
   return (
     <div
-      className={`w-full p-1 border-y border-[#00000056] h-[400px] ${className}`}
+      className={`w-full px-1 border-y border-[#00000056] h-[400px] overflow-hidden ${className}`}
     >
       <Image
         height={400}
-        width={600}
+        width={400}
         layout='responsive'
         src={url}
-        className='w-full h-full object-contain'
+        className='w-full max-h-full object-contain box-border'
         alt=''
       />
     </div>
