@@ -15,6 +15,7 @@ import {
   setDoc,
   updateDoc
 } from 'firebase/firestore'
+import Image from 'next/image'
 import { v4 } from 'uuid'
 import { cloneDeep, result } from 'lodash'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -205,7 +206,7 @@ function PostEngage ({ post }) {
         console.log(post, result)
         setHasLiked(result)
       })
-  }, [isLoaded, user,post])
+  }, [isLoaded, user, post])
 
   return (
     <div className='w-full flex items-center justify-around my-2'>
@@ -230,7 +231,9 @@ function PostEngage ({ post }) {
       <dialog ref={shareDialogRef} className='p-3 rounded-xl ' open={false}>
         <div className='flex flex-col items-start justify-between'>
           {imageUrl ? (
-            <img
+            <Image
+              height={400}
+              width={400}
               src={imageUrl}
               className='w-[400px] h-[400px] object-contain'
               alt=''
@@ -243,7 +246,9 @@ function PostEngage ({ post }) {
             accept='image/*'
           />
           {shareInfo.url ? (
-            <img
+            <Image
+              height={400}
+              width={400}
               src={shareInfo.url}
               className='w-[400px] h-[400px] object-contain'
               alt=''
@@ -294,7 +299,13 @@ const EngageIcon = ({
         e.stopPropagation()
       }}
     >
-      <img src={bool ? conditionalUrl : url} className='h-5 mr-1' alt='' />
+      <Image
+        height={20}
+        width={20}
+        src={bool ? conditionalUrl : url}
+        className='h-5 mr-1'
+        alt=''
+      />
       <span>{bool ? conditionalLabel : label}</span>
     </div>
   )

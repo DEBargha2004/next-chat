@@ -7,11 +7,11 @@ import { useUser } from '@clerk/nextjs'
 import messeage_CreatedAt from '@/functions/timeStamp_userbox'
 import _, { cloneDeep } from 'lodash'
 import messageStatus from '@/functions/messageStaus'
-import Image from 'next/image'
 import { leaveGroup } from '@/functions/leaveGroup'
 import { useRouter } from 'next/navigation'
 import { arrayRemove, arrayUnion, doc, updateDoc,getDoc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
+import { Image } from 'next/image'
 
 const RemoveParticipant = async ({ id, router, selectedGroup, user }) => {
   const docInfo = await getDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`))
@@ -53,7 +53,7 @@ function Userbox ({
     return presenceInfo.find(
       userPresence => userPresence?.user_id === item?.user_id
     )
-  }, [presenceInfo])
+  }, [presenceInfo,item])
 
   const unreadMessages = useMemo(() => {
     const message_info = messages[id]
@@ -63,7 +63,7 @@ function Userbox ({
     )
 
     return unread_message_info
-  }, [messages[id]])
+  }, [messages[id],id,user])
 
   const lastMessage = useMemo(() => {
     const messages_info = messages[id]
@@ -193,8 +193,10 @@ const ParticipantsOverlay = ({
   }
   return (
     <div className='z-10 right-2 top-[50%] -translate-y-[50%] absolute transition-all'>
-      <img
+      <Image
         src='	https://cdn-icons-png.flaticon.com/512/2311/2311524.png'
+        height={32}
+        width={32}
         className='h-8 p-2 rounded-full hover:bg-gray-700 hover:invert'
         alt=''
         id='participantsInfo'

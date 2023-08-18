@@ -13,6 +13,7 @@ import {
 import { firestoreDB } from '@/firebase.config'
 import { cloneDeep } from 'lodash'
 import { friendsZone } from '@/app/friends/page'
+import Image from 'next/image'
 
 function SearchedPeople ({ data }) {
   const { user } = useUser()
@@ -222,7 +223,7 @@ function SearchedPeople ({ data }) {
     <PostWrapper
       className={`p-2 rounded w-fit mx-auto my-3 shadow-lg shadow-[#00000046] hover:scale-105 transition-all`}
     >
-      <img src={data.user_img} className='h-[150px] rounded' />
+      <Image src={data.user_img} className='h-[150px] rounded' height={150} width={150} />
       <h1>{data.user_name}</h1>
       <div>
         {data.friendshipInfo.friendshipId ? (

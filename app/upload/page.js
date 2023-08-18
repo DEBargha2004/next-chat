@@ -7,6 +7,7 @@ import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { ref, uploadBytes } from 'firebase/storage'
 import { useContext, useRef, useState } from 'react'
 import { v4 } from 'uuid'
+import Image from 'next/image'
 
 function Page () {
   const postDescriptionRef = useRef(null)
@@ -95,14 +96,16 @@ function Page () {
           hidden
         />
         <label htmlFor='imageInputForPost'>
-          <img
+          <Image
             src='https://cdn-icons-png.flaticon.com/512/5175/5175601.png'
             alt=''
             className='h-10 cursor-pointer my-5'
+            height={40}
+            width={40}
           />
         </label>
         {image.url ? (
-          <img src={image.url} className='w-[85%] h-[350px] object-contain my-5' />
+          <Image height={350} width={500} layout='reponsive' src={image.url} className='w-[85%] h-[350px] object-contain my-5' />
         ) : null}
         <textarea
           className='bg-transparent w-[90%] outline-2 my-5 shrink-0 outline-black border-black outline-none rounded-lg h-12 py-3 px-2 overflow-hidden resize-none'
