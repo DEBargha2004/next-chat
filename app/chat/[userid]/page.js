@@ -11,7 +11,7 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Avatar from '@/components/Avatar'
 
-export default function page ({ params }) {
+export default function Page ({ params }) {
   const { friends, selectedChatUser, setSelectedChatUser, messages } =
     useContext(Appstate)
 

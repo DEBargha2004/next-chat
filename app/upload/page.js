@@ -8,7 +8,7 @@ import { ref, uploadBytes } from 'firebase/storage'
 import { useContext, useRef, useState } from 'react'
 import { v4 } from 'uuid'
 
-function page () {
+function Page () {
   const postDescriptionRef = useRef(null)
   const postImageRef = useRef(null)
   const [image, setImage] = useState({ url: '', file: null })

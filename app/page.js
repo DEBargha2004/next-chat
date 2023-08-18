@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 
-function page () {
+function Page () {
   const { user } = useUser()
   return (
     <div className='h-full w-full flex justify-center items-center flex-col'>

@@ -14,7 +14,7 @@ import {
 import { useContext, useEffect, useRef } from 'react'
 import Post from '@/components/Post'
 
-function page () {
+function Page () {
   const { posts, setPosts, lastPost, closeFriends, setCloseFriends } =
     useContext(Appstate)
   const postSectionRef = useRef(null)

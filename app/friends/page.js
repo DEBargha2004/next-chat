@@ -8,7 +8,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 export const friendsZone = createContext()
 
-function page () {
+function Page () {
   const { user, isLoaded } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
