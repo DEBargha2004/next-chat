@@ -57,12 +57,12 @@ export default function Page ({ params }) {
                 <p className='text-xs text-slate-600'>{selectedChatUser?.user_email}</p>
               </div>
             </RightSidebarCompWrapper>
-            <RightSidebarCompWrapper>
+            {/* <RightSidebarCompWrapper>
               <div className='flex flex-col items-start justify-between'>
                 <p className='text-slate-800 text-lg font-semibold'>There is no place to hide</p>
                 <p className='text-slate-600 text-xs'>9 July</p>
               </div>
-            </RightSidebarCompWrapper>
+            </RightSidebarCompWrapper> */}
           </RightSidebar>
         </div>
       ) : (

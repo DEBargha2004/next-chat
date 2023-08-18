@@ -237,9 +237,6 @@ function Page ({ params }) {
                         item={participant}
                         id={participant.user_id}
                         onClick={e => {
-                          const info =
-                            document.getElementById('participantsInfo')
-
                           participant.user_id === user?.id
                             ? null
                             : handleSelectUser_For_Conversation({
