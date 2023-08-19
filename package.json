@@ -10,12 +10,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.22.1",
-    "@emoji-mart/data": "^1.1.2",
-    "@emoji-mart/react": "^1.1.1",
     "algoliasearch": "^4.19.1",
     "autoprefixer": "10.4.14",
     "date-fns": "^2.30.0",
-    "emoji-mart": "^5.5.2",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.10",
     "firebase": "^10.1.0",

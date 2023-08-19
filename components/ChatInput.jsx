@@ -207,7 +207,7 @@ function ChatInput ({ type, width }) {
             />
           </div>
         </label>
-        <div
+        {/* <div
           className={`p-1 hover:bg-slate-200 ${
             emojiButtonStatus.clicked ? `bg-slate-200` : ``
           } transition-all rounded-md relative`}
@@ -247,7 +247,7 @@ function ChatInput ({ type, width }) {
               />
             </div>
           ) : null}
-        </div>
+        </div> */}
         <input
           type='text'
           name=''
