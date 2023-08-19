@@ -43,7 +43,6 @@ function MessagesList({ list,database }) {
       id="messageContainer"
       ref={messageContainerRef}
     >
-    <Picker data={data} onEmojiSelect={e => console.log(e.native)} />
       <div className="w-full" ref={messagesListRef} id="messageList">
         {(list || messages[selectedChatUser.user_id])?.map(
           (message, index) => {

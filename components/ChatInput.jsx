@@ -4,11 +4,11 @@ import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
 import { firestoreDB } from '../firebase.config'
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore'
-import { cloneDeep } from 'lodash'
 import { abortImage } from '@/functions/abortImage'
 import { uploadImage } from '@/functions/uploadImage'
 import Image from 'next/image'
 import generateUniqueId from '@/functions/generateUniqueid'
+import EmojiPicker from 'emoji-picker-react'
 
 function ChatInput ({ type, width }) {
   const { user } = useUser()
@@ -165,7 +165,8 @@ function ChatInput ({ type, width }) {
 
   useEffect(() => {
     const handleEmojisClose = e => {
-      if (!e.target.contains(emoji_icon)) {
+      console.log(e.target);
+      if (!emoji_parent.contains(e.target)) {
         setEmojiButtonStatus(prev => ({
           ...prev,
           clicked: false,
@@ -175,6 +176,7 @@ function ChatInput ({ type, width }) {
     }
 
     const emoji_icon = document.getElementById('emoji_icon')
+    const emoji_parent = document.getElementById('emojis')
     window.addEventListener('click', handleEmojisClose)
 
     return () => window.removeEventListener('click', handleEmojisClose)
@@ -205,7 +207,7 @@ function ChatInput ({ type, width }) {
             />
           </div>
         </label>
-        {/* <div
+        <div
           className={`p-1 hover:bg-slate-200 ${
             emojiButtonStatus.clicked ? `bg-slate-200` : ``
           } transition-all rounded-md relative`}
@@ -236,16 +238,14 @@ function ChatInput ({ type, width }) {
           />
           {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
             <div className='absolute bottom-8'>
-              <Picker
-                data={data}
-                onEmojiSelect={e => {
-                  let { native } = e
-                  setUserInput(userInputClone + native)
+              <EmojiPicker
+                onEmojiClick={e=> {
+                  setUserInput(prev => prev+e.emoji)
                 }}
               />
             </div>
           ) : null}
-        </div> */}
+        </div>
         <input
           type='text'
           name=''
