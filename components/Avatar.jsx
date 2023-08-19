@@ -3,7 +3,6 @@ import man from '../public/man.jpeg'
 import { useEffect, useMemo, useState } from 'react'
 import { getImage } from '@/functions/getImage'
 import { useUser } from '@clerk/nextjs'
-import { twMerge } from 'tailwind-merge'
 
 const icons = { group: `https://cdn-icons-png.flaticon.com/512/33/33308.png` }
 

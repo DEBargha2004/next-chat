@@ -6,6 +6,7 @@ import { firestoreDB, contentDB } from '../firebase.config'
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore'
 import { ref, uploadBytes } from 'firebase/storage'
 import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
 import { cloneDeep } from 'lodash'
 import { abortImage } from '@/functions/abortImage'
 import { uploadImage } from '@/functions/uploadImage'
@@ -238,6 +239,7 @@ function ChatInput ({ type, width }) {
             <div className='absolute bottom-8'>
               <Picker
                 className=''
+                data={data}
                 onEmojiSelect={e => {
                   let { native } = e
                   let userInputClone = cloneDeep(userInput)
