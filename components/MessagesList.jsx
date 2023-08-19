@@ -5,6 +5,7 @@ import { Appstate } from "@/hooks/context";
 import ChatMessage from "./ChatMessage";
 import RefMessage from "./RefMessage";
 import ChatInputImage from "./ChatInputImage";
+import Picker from '@emoji-mart/react'
 
 function MessagesList({ list,database }) {
   const messagesListRef = useRef(null);
@@ -41,6 +42,7 @@ function MessagesList({ list,database }) {
       id="messageContainer"
       ref={messageContainerRef}
     >
+      <Picker onEmojiSelect={e => console.log(e.native)} />
       <div className="w-full" ref={messagesListRef} id="messageList">
         {(list || messages[selectedChatUser.user_id])?.map(
           (message, index) => {
