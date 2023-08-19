@@ -5,7 +5,6 @@ import { Appstate } from "@/hooks/context";
 import ChatMessage from "./ChatMessage";
 import RefMessage from "./RefMessage";
 import ChatInputImage from "./ChatInputImage";
-import Picker from '@emoji-mart/react'
 
 function MessagesList({ list,database }) {
   const messagesListRef = useRef(null);
