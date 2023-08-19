@@ -205,10 +205,9 @@ function PostEngage ({ post }) {
   useEffect(() => {
     post &&
       fetchEngageInfo(post.postId, user?.id).then(result => {
-        console.log(post, result)
         setHasLiked(result)
       })
-  }, [isLoaded, user, post])
+  }, [isLoaded, user])
 
   return (
     <div className='w-full flex items-center justify-around my-2'>

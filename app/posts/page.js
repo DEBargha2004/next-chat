@@ -26,7 +26,7 @@ function Page () {
       collection(firestoreDB, `posts`),
       where('creator.user_id', 'in', closeFriends),
       orderBy('createdAt', 'desc'),
-      limit(3)
+      limit(6)
     )
     if (startAfterDate) {
       // console.log('startAfterDate is', startAfterDate)
@@ -34,7 +34,7 @@ function Page () {
         collection(firestoreDB, `posts`),
         where('creator.user_id', 'in', closeFriends),
         orderBy('createdAt', 'desc'),
-        limit(3),
+        limit(6),
         startAfter(startAfterDate)
       )
     }

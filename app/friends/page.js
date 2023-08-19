@@ -19,7 +19,7 @@ function Page () {
   const handleSearchChange = async e => {
     setSearchQuery(e.target.value)
     let results = await fetch(
-      `/api/findPeople?userId=${user.id}&query=${e.target.value}`,
+      `/api/findPeople?userId=${user?.id}&query=${e.target.value}`,
       {
         method: 'POST',
         body: JSON.stringify({
@@ -40,7 +40,7 @@ function Page () {
     if (scrollBottom <= 100) {
       if (!fetching) {
         setFetching(true)
-        fetch(`/api/findPeople?userId=${user.id}&createdAt=${lastFriend.current}`)
+        fetch(`/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`)
           .then(result => result.json())
           .then(data => {
             console.log(data)
@@ -60,7 +60,7 @@ function Page () {
   useEffect(() => {
     if (!isLoaded) return
     console.log(lastFriend);
-    fetch(`/api/findPeople?userId=${user.id}&createdAt=${lastFriend.current}`)
+    fetch(`/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`)
       .then(result => result.json())
       .then(data => {
         console.log(data)
