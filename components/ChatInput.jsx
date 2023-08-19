@@ -1,10 +1,9 @@
 import { useState, useContext, useRef, useEffect } from 'react'
-import { v4, v5 } from 'uuid'
+import { v4 } from 'uuid'
 import { Appstate } from '@/hooks/context'
 import { useUser } from '@clerk/nextjs'
-import { firestoreDB, contentDB } from '../firebase.config'
+import { firestoreDB } from '../firebase.config'
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore'
-import { ref, uploadBytes } from 'firebase/storage'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
 import { cloneDeep } from 'lodash'
@@ -24,7 +23,9 @@ function ChatInput ({ type, width }) {
     setReferenceMessage,
     selectedGroup
   } = useContext(Appstate)
+
   const userInputRef = useRef(null)
+
   const [userInput, setUserInput] = useState('')
   const [emojiButtonStatus, setEmojiButtonStatus] = useState({
     clicked: false,
@@ -238,13 +239,10 @@ function ChatInput ({ type, width }) {
           {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
             <div className='absolute bottom-8'>
               <Picker
-                className=''
                 data={data}
                 onEmojiSelect={e => {
                   let { native } = e
-                  let userInputClone = cloneDeep(userInput)
-                  userInputClone += native
-                  setUserInput(userInputClone)
+                  setUserInput(userInputClone + native)
                 }}
               />
             </div>
