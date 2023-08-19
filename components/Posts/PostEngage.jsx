@@ -170,15 +170,17 @@ function PostEngage ({ post }) {
       return prev
     })
 
-    setShareInfo(prev => ({ ...prev, desc: '', file: null, url: '' }))
-    setUploading(false)
-    shareDialogRef.current.close()
     setPosts(prev => {
       prev = cloneDeep(prev)
       postInfo.createdAt.seconds = Date.now() / 1000
 
       return [postInfo, ...prev]
     })
+
+    setShareInfo(prev => ({ ...prev, desc: '', file: null, url: '' }))
+
+    setUploading(false)
+    shareDialogRef.current.close()
   }
 
   const handleShareFileChange = e => {

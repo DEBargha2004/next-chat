@@ -26,7 +26,7 @@ function Post ({ post }) {
   useEffect(() => {
     setPostBoxHeight(postBoxRef.current.offsetHeight)
   }, [])
-
+ 
   return (
     <LocalContext.Provider
       value={{

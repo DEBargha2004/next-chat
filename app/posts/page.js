@@ -85,7 +85,7 @@ function Page () {
       {/* <PostLeftBar /> */}
       <div className='w-[35%]'>
         {posts.map((post, index) => {
-          return <Post post={post} key={index} />
+          return <Post post={post} key={post.postId} />
         })}
       </div>
     </div>
