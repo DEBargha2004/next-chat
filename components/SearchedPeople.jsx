@@ -105,7 +105,7 @@ function SearchedPeople ({ data }) {
           friend_prev => friend_prev.user_id === data.user_id
         )
         friend.friendshipInfo.status = `accepted`
-        friend.acceptedAt = { seconds: Date.now() / 1000 }
+        friend.friendshipInfo.acceptedAt = { seconds: Date.now() / 1000 }
         return prev
       })
       setSearchResults(prev => {
@@ -114,7 +114,7 @@ function SearchedPeople ({ data }) {
           friend_prev => friend_prev.user_id === data.user_id
         )
         friend.friendshipInfo.status = `accepted`
-        friend.acceptedAt = { seconds: Date.now() / 1000 }
+        friend.friendshipInfo.acceptedAt = { seconds: Date.now() / 1000 }
         return prev
       })
     }
