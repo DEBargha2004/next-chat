@@ -10,7 +10,7 @@ function PostCreation ({ creator, createdAt, avatarHeight, avatarWidth }) {
         w={avatarWidth}
       />
       <div className='flex flex-col items-start justify-between ml-2'>
-        <h1 className='font-semibold'>{creator?.user_name}</h1>
+        <h1 className='font-semibold'>{creator?.user_name || creator?.user_email}</h1>
         <p className='text-xs text-slate-500'>
           {generateTimeStamp(createdAt?.seconds * 1000)}
         </p>
