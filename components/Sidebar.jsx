@@ -11,7 +11,7 @@ function Sidebar ({ className,children }) {
     sidebarRef.current.style.height = `${window.innerHeight}px`
   },[])
   return (
-    <div className={`${className} overflow-y-scroll sidebar`} ref={sidebarRef}>
+    <div className={`${className} overflow-y-auto sidebar`} ref={sidebarRef}>
       {
         children
       }

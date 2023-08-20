@@ -310,7 +310,7 @@ export default function RootLayout ({ children }) {
       <Sidebar className={`w-[30%] border-r-[1px] border-slate-400`}>
         <Topbar linkedElement={chat} />
         <div
-          className='w-[90%] mx-auto p-1 bg-slate-200 rounded mt-3'
+          className='w-[90%] mx-auto mb-5 p-1 bg-slate-200 rounded mt-3 cursor-pointer hover:bg-slate-300'
           onClick={toggleModal}
         >
           Create New Group
