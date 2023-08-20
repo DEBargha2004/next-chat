@@ -1,26 +1,74 @@
 import { Appstate } from '@/hooks/context'
-import { UserButton } from '@clerk/nextjs'
-import { useContext } from 'react'
+import { UserButton, useUser } from '@clerk/nextjs'
+import { createContext, useContext, useMemo } from 'react'
 import ServiceComponent from './ServiceComponent'
 import { serviceList } from '@/constants/serviceList'
-import Image from 'next/image'
+
+export const sidenavProvider = createContext()
 
 function Sidenav ({ className }) {
-  const { selectedService } = useContext(Appstate)
+  const { selectedService, messages } = useContext(Appstate)
+  const { user } = useUser()
+
+  const unreadUsermessage = useMemo(() => {
+    let count = 0
+    const messageKeys = Object.keys(messages)
+    messageKeys.forEach(key => {
+      if (key.indexOf('user_') !== 0) return
+      const messageList = messages[key]
+      messageList.forEach(message => {
+        if (message.read_by) {
+          if (
+            message.sender_id !== user?.id &&
+            !message.read_by.includes(user?.id)
+          ) {
+            ++count
+          }
+        }
+      })
+    })
+
+    return count
+  }, [messages, user])
+
+  const unreadGroupmessage = useMemo(() => {
+    let count = 0
+    const messageKeys = Object.keys(messages)
+    messageKeys.forEach(key => {
+      if (key.indexOf('group_') !== 0) return
+      const messageList = messages[key]
+      messageList.forEach(message => {
+        if (message.read_by) {
+          if (
+            message.sender_id !== user?.id &&
+            !message.read_by.includes(user?.id)
+          ) {
+            ++count
+          }
+        }
+      })
+    })
+
+    return count
+  }, [messages, user])
+
   return (
     <nav
       className={`${className} flex items-end pb-10 border-r-[1px] border-slate-400`}
     >
       <div className='w-full h-[70%] flex flex-col justify-between items-center'>
         <div className='relative flex flex-col items-center justify-between w-full h-[60%]'>
-          {serviceList.map((service, index) => (
-            <ServiceComponent
-              url={service.url}
-              index={index}
-              to={service.to}
-              key={index}
-            />
-          ))}
+          <sidenavProvider.Provider value={{ unreadUsermessage,unreadGroupmessage }}>
+            {serviceList.map((service, index) => (
+              <ServiceComponent
+                url={service.url}
+                index={index}
+                to={service.to}
+                key={index}
+                service={service.service}
+              />
+            ))}
+          </sidenavProvider.Provider>
         </div>
         <div className='flex flex-col items-center justify-end h-[20%]'>
           {/* <Image

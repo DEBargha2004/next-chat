@@ -115,7 +115,7 @@ function PostEngage ({ post }) {
 
   const handleSubmitShare = async post => {
     if (uploading) return
-    if (!shareInfo.desc && !shareInfo.file) return
+    // if (!shareInfo.desc && !shareInfo.file) return
     setUploading(true)
 
     const postId = v4()
@@ -129,12 +129,16 @@ function PostEngage ({ post }) {
       user_email: user?.primaryEmailAddress.emailAddress,
       user_img: user?.imageUrl
     }
+
     const postref = {
       creator: post.creator,
       createdAt: post.createdAt,
-      description: post.postDescription,
+      description: post.postDescription || '',
       imageAddress: post.postImageAddress
     }
+
+    console.log(postref);
+
     !post.postImageAddress && delete postref.imageAddress
     const likesCount = 0
     const commentsCount = 0
@@ -142,7 +146,7 @@ function PostEngage ({ post }) {
     const postInfo = {
       postId,
       createdAt,
-      postDescription,
+      postDescription : postDescription,
       postImageAddress,
       creator,
       likesCount,
@@ -151,8 +155,10 @@ function PostEngage ({ post }) {
       postref
     }
 
+    console.log(postInfo);
+
     !shareInfo.file && delete postInfo.postImageAddress
-    !shareInfo.desc && delete postInfo.postDescription
+    // !shareInfo.desc && delete postInfo.postDescription
 
     shareInfo.file &&
       (await uploadBytes(ref(contentDB, postImageAddress), shareInfo.file))

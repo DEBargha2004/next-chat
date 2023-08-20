@@ -29,7 +29,6 @@ function Page () {
     )
 
     results = await results.json()
-    console.log(results)
     setSearchResults(e.target.value ? results.data : [])
   }
 
@@ -45,7 +44,6 @@ function Page () {
         )
           .then(result => result.json())
           .then(data => {
-            console.log(data)
             const lastData = data?.allFriends?.friends?.at(-1)
             if (lastData.current) {
               lastFriend.current = lastData.current.createdAt
@@ -61,14 +59,13 @@ function Page () {
 
   useEffect(() => {
     if (!isLoaded) return
-    console.log(lastFriend)
+
     !lastFriend.current &&
       fetch(
         `/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`
       )
         .then(result => result.json())
         .then(data => {
-          console.log(data)
           const lastData = data?.allFriends?.friends?.at(-1)
           if (lastData?.current) {
             lastFriend.current = lastData.current.createdAt
