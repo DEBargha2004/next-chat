@@ -3,7 +3,7 @@ export const handleSearchUser = async ({ e, user_id, setQuery, excluded }) => {
   if (!e.target.value) {
     return { data: [] }
   }
-  console.log(e.target.value, 'bypassed')
+  // console.log(e.target.value, 'bypassed')
   let searchList = await fetch(
     `/api/searchUser?userId=${user_id}&query=${e.target.value}`,
     {
@@ -15,7 +15,7 @@ export const handleSearchUser = async ({ e, user_id, setQuery, excluded }) => {
   )
 
   searchList = await searchList.json()
-  console.log(searchList)
+  // console.log(searchList)
 
   return searchList
 }

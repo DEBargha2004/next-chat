@@ -132,7 +132,7 @@ function CommentsSection ({ classname }) {
     <div
       className={`h-[95%] max-h-[600px] w-full bg-white transition-all rounded-xl shadow-lg shadow-[#0000005e] ${classname}`}
       ref={commenSectionRef}
-      style={{ height: height.value }}
+      style={{ height: height.value,width:`85%` }}
     >
       <form
         onSubmit={handleSubmitComment}

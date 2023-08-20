@@ -14,11 +14,15 @@ import { firestoreDB } from '@/firebase.config'
 import { cloneDeep } from 'lodash'
 import { friendsZone } from '@/app/friends/page'
 import Image from 'next/image'
+import { Appstate } from '@/hooks/context'
 
 function SearchedPeople ({ data }) {
+  // console.log(data)
   const { user } = useUser()
-  const { setCloseFriends, searchResults, setSearchResults } =
-    useContext(friendsZone)
+  const { searchResults, setSearchResults } = useContext(friendsZone)
+
+  const { closeFriendsInFriends, setCloseFriendsInFriends } =
+    useContext(Appstate)
 
   const handleAddFriend = async () => {
     const friendshipId = generateUniqueId(user?.id, data.user_id)
@@ -49,7 +53,7 @@ function SearchedPeople ({ data }) {
         friendshipInfo
       )
 
-      setCloseFriends(prev => {
+      setCloseFriendsInFriends(prev => {
         prev = cloneDeep(prev)
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
@@ -71,9 +75,11 @@ function SearchedPeople ({ data }) {
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
         )
-        friend.friendshipInfo = {
-          ...friendshipInfo,
-          createdAt: { seconds: Date.now() / 1000 }
+        if (friend) {
+          friend.friendshipInfo = {
+            ...friendshipInfo,
+            createdAt: { seconds: Date.now() / 1000 }
+          }
         }
 
         return prev
@@ -99,7 +105,7 @@ function SearchedPeople ({ data }) {
         }
       )
 
-      setCloseFriends(prev => {
+      setCloseFriendsInFriends(prev => {
         prev = cloneDeep(prev)
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
@@ -113,8 +119,10 @@ function SearchedPeople ({ data }) {
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
         )
-        friend.friendshipInfo.status = `accepted`
-        friend.friendshipInfo.acceptedAt = { seconds: Date.now() / 1000 }
+        if (friend) {
+          friend.friendshipInfo.status = `accepted`
+          friend.friendshipInfo.acceptedAt = { seconds: Date.now() / 1000 }
+        }
         return prev
       })
     }
@@ -130,7 +138,7 @@ function SearchedPeople ({ data }) {
         doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
       )
 
-      setCloseFriends(prev => {
+      setCloseFriendsInFriends(prev => {
         prev = cloneDeep(prev)
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
@@ -143,7 +151,9 @@ function SearchedPeople ({ data }) {
         const friend = prev.find(
           friend_prev => friend_prev.user_id === data.user_id
         )
-        friend.friendshipInfo = {}
+        if (friend) {
+          friend.friendshipInfo = {}
+        }
         return prev
       })
     }
@@ -158,8 +168,9 @@ function SearchedPeople ({ data }) {
       doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
     )
 
-    setCloseFriends(prev => {
+    setCloseFriendsInFriends(prev => {
       prev = cloneDeep(prev)
+      // console.log(prev)
       const friend = prev.find(
         friend_prev => friend_prev.user_id === data.user_id
       )
@@ -171,7 +182,9 @@ function SearchedPeople ({ data }) {
       const friend = prev.find(
         friend_prev => friend_prev.user_id === data.user_id
       )
-      friend.friendshipInfo = {}
+      if (friend) {
+        friend.friendshipInfo = {}
+      }
       return prev
     })
   }
@@ -197,7 +210,7 @@ function SearchedPeople ({ data }) {
           doc(firestoreDB, `users/${user?.id}/friends/${friendshipId}`)
         )
 
-        setCloseFriends(prev => {
+        setCloseFriendsInFriends(prev => {
           prev = cloneDeep(prev)
           const friend = prev.find(
             friend_prev => friend_prev.user_id === data.user_id
@@ -210,21 +223,30 @@ function SearchedPeople ({ data }) {
           const friend = prev.find(
             friend_prev => friend_prev.user_id === data.user_id
           )
-          friend.friendshipInfo = {}
+          if (friend) {
+            friend.friendshipInfo = {}
+          }
           return prev
         })
       }
     } else {
-      console.log(data, data?.seekerId, user?.id)
+      // console.log(data, data?.seekerId, user?.id)
     }
   }
 
   return (
     <PostWrapper
-      className={`p-2 rounded w-fit mx-auto my-3 shadow-lg shadow-[#00000046] hover:scale-105 transition-all`}
+      className={`p-2 rounded w-[165px] mx-auto my-3 shadow-lg shadow-[#00000046] hover:scale-105 transition-all`}
     >
-      <Image src={data.user_img} className='h-[150px] rounded' height={150} width={150} />
-      <h1>{data.user_name}</h1>
+      <Image
+        src={data.user_img}
+        className='h-[150px] rounded'
+        height={150}
+        width={150}
+      />
+      <h1 className='truncate w-full text-slate-500 text-sm my-1'>
+        {data.user_name || data.user_email}
+      </h1>
       <div>
         {data.friendshipInfo.friendshipId ? (
           data?.friendshipInfo?.status === `pending` ? (

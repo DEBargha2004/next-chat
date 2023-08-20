@@ -83,7 +83,7 @@ function Page () {
       id='postSection'
     >
       {/* <PostLeftBar /> */}
-      <div className='w-[35%]'>
+      <div className='w-[45%]'>
         {posts.map((post, index) => {
           return <Post post={post} key={post.postId} />
         })}

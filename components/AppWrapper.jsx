@@ -28,7 +28,6 @@ export default function AppWrapper ({ children }) {
     conversationsInfo,
     setSelectedService,
     setGroups,
-    closeFriends,
     setCloseFriends
   } = useContext(Appstate)
 

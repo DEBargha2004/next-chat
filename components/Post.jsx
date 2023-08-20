@@ -67,8 +67,8 @@ function Post ({ post }) {
           <PostEngage post={post} />
         </PostWrapper>
         <CommentsSection
-          classname={`duration-300 absolute top-1/2 -translate-y-[50%] left-0 h-full w-full ${
-            commentBox.state ? `translate-x-[51%]` : ``
+          classname={`duration-300 absolute top-1/2 -translate-y-[50%] left-0 h-full ${
+            commentBox.state ? `translate-x-[59%]` : ``
           }`}
         />
       </div>

@@ -165,7 +165,7 @@ function ChatInput ({ type, width }) {
 
   useEffect(() => {
     const handleEmojisClose = e => {
-      console.log(e.target);
+      // console.log(e.target);
       if (!emoji_parent.contains(e.target)) {
         setEmojiButtonStatus(prev => ({
           ...prev,

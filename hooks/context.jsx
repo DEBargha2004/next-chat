@@ -31,6 +31,8 @@ export function GlobalAppStateProvider ({ children }) {
   const [posts, setPosts] = useState([])
   const [selectedComment, setSelectedComment] = useState(null)
   const [closeFriends, setCloseFriends] = useState([])
+  const [closeFriendsInFriends, setCloseFriendsInFriends] = useState([])
+
   const lastPost = useRef(null)
   const lastFriend = useRef(null)
 
@@ -117,7 +119,9 @@ export function GlobalAppStateProvider ({ children }) {
         lastPost,
         closeFriends,
         setCloseFriends,
-        lastFriend
+        lastFriend,
+        closeFriendsInFriends,
+        setCloseFriendsInFriends
       }}
     >
       {children}

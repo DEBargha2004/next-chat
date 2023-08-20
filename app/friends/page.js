@@ -12,8 +12,8 @@ function Page () {
   const { user, isLoaded } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
-  const [closeFriends, setCloseFriends] = useState([])
-  const { lastFriend } = useContext(Appstate)
+  const { lastFriend, closeFriendsInFriends, setCloseFriendsInFriends } =
+    useContext(Appstate)
   const [fetching, setFetching] = useState(false)
 
   const handleSearchChange = async e => {
@@ -40,7 +40,9 @@ function Page () {
     if (scrollBottom <= 100) {
       if (!fetching) {
         setFetching(true)
-        fetch(`/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`)
+        fetch(
+          `/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`
+        )
           .then(result => result.json())
           .then(data => {
             console.log(data)
@@ -48,34 +50,35 @@ function Page () {
             if (lastData.current) {
               lastFriend.current = lastData.current.createdAt
             }
-            setCloseFriends(data.allFriends.friends)
-          }).then(()=>{
+            setCloseFriendsInFriends(data.allFriends.friends)
+          })
+          .then(() => {
             setFetching(false)
           })
       }
     }
   }
 
-
   useEffect(() => {
     if (!isLoaded) return
-    console.log(lastFriend);
-    fetch(`/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`)
-      .then(result => result.json())
-      .then(data => {
-        console.log(data)
-        const lastData = data?.allFriends?.friends?.at(-1)
-        if (lastData.current) {
-          lastFriend.current = lastData.current.createdAt
-        }
-        setCloseFriends(data.allFriends.friends)
-      })
+    console.log(lastFriend)
+    !lastFriend.current &&
+      fetch(
+        `/api/findPeople?userId=${user?.id}&createdAt=${lastFriend.current}`
+      )
+        .then(result => result.json())
+        .then(data => {
+          console.log(data)
+          const lastData = data?.allFriends?.friends?.at(-1)
+          if (lastData?.current) {
+            lastFriend.current = lastData.current.createdAt
+          }
+          setCloseFriendsInFriends(data.allFriends.friends)
+        })
   }, [isLoaded])
 
   return (
-    <friendsZone.Provider
-      value={{ closeFriends, setCloseFriends, searchResults, setSearchResults }}
-    >
+    <friendsZone.Provider value={{ searchResults, setSearchResults }}>
       <main className='w-[calc(100%-80px)] h-full overflow-y-auto flex items-start justify-between px-[50px]'>
         <section className='w-2/5'>
           <Searchbar
@@ -90,10 +93,10 @@ function Page () {
           </div>
         </section>
         <div
-          className='flex flex-wrap w-2/5 overflow-y-auto h-full items-start'
+          className='grid grid-cols-3 w-[50%] overflow-y-auto h-full items-start'
           onScroll={handleScroll}
         >
-          {closeFriends?.map(result => {
+          {closeFriendsInFriends?.map(result => {
             return <SearchedPeople data={result} key={result.user_id} />
           })}
         </div>

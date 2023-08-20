@@ -26,26 +26,26 @@ export async function GET (request) {
 
   const userId = searchParams.get('userId')
   const createdAt = searchParams.get('createdAt')
-  console.log(createdAt);
+  // console.log(createdAt);
 
   let friendsQuery
   let friends = []
   if (createdAt) {
-    console.log('createdAt is ',createdAt);
+    // console.log('createdAt is ',createdAt);
     friendsQuery = query(
       collection(firestoreDB, `users/${userId}/friends`),
       orderBy('createdAt','desc'),
       limit(10),
     )
   } else {
-    console.log('createdAt',createdAt);
+    // console.log('createdAt',createdAt);
     friendsQuery = query(
       collection(firestoreDB, `users/${userId}/friends`),
       orderBy('createdAt','desc'),
       limit(10)
     )
   }
-  console.log(friendsQuery);
+  // console.log(friendsQuery);
   const friends_docs = await getDocs(friendsQuery)
   for (const doc of friends_docs.docs) {
     const seekerId = doc.get('seekerId')
@@ -76,18 +76,18 @@ export async function POST (request) {
 
   const { excluded } = await request.json()
 
-  console.log(excluded)
+  // console.log(excluded)
 
   const query = searchParams.get('query')
   const userId = searchParams.get('userId')
 
   if (!query) return NextResponse.json({ data: [] })
-  console.log(query, 'found')
+  // console.log(query, 'found')
 
   try {
     const searchResults = await algoliaIndex.search(query)
 
-    console.log(searchResults.hits)
+    // console.log(searchResults.hits)
 
     searchResults.hits = searchResults.hits.filter(user => {
       const userExcluded = excluded?.find(
@@ -97,7 +97,7 @@ export async function POST (request) {
       return true
     })
 
-    console.log(searchResults.hits)
+    // console.log(searchResults.hits)
 
     const array = await Promise.all(
       searchResults.hits.map(async (user, index) => {
@@ -125,7 +125,7 @@ export async function POST (request) {
 
     return NextResponse.json({ data: array })
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return new Response('error')
   }
 }

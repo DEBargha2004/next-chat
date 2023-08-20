@@ -161,7 +161,7 @@ export default function RootLayout ({ children }) {
 
         const participants = [...selectedParticipants, owner]
 
-        console.log(participants)
+        // console.log(participants)
 
         const timeStamp = serverTimestamp()
 
@@ -244,20 +244,20 @@ export default function RootLayout ({ children }) {
   }
 
   const handleSelect_Participants = user => {
-    console.log(user)
+    // console.log(user)
     // Do Something
     const checkUser = selectedParticipants.find(
       selectedUser => selectedUser.user_id === user.user_id
     )
 
-    console.log(checkUser)
+    // console.log(checkUser)
     if (!checkUser) {
       setSelectedParticipants(prev => [...prev, user])
     } else {
       const index = selectedParticipants.findIndex(
         selectedUser => selectedUser.user_id === user.user_id
       )
-      console.log(index)
+      // console.log(index)
       setSelectedParticipants(prev => {
         const prevClone = cloneDeep(prev)
         prevClone.splice(index, 1)

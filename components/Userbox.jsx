@@ -83,7 +83,7 @@ function Userbox ({
       <div className='h-10 ml-4 flex flex-col justify-center w-[75%]'>
         <div className='flex justify-between items-center'>
           <h1 className='flex items-center font-semibold'>
-            {item.name || item.user_name}
+            {item.name || item.user_name || item.user_email}
           </h1>
           {/*based on condition*/}
           <div className='flex items-center justify-end w-[42%]'>

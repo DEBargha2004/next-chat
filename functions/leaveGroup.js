@@ -16,7 +16,7 @@ export const leaveGroup = async ({ id, selectedGroup, router,redirect }) => {
     participant => participant.user_id === id
   )
 
-  console.log(isParticipant)
+  // console.log(isParticipant)
 
   isParticipant &&
     (await updateDoc(

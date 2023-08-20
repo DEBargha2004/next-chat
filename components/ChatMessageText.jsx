@@ -30,7 +30,7 @@ function ChatMessageText ({ message }) {
 
   useEffect(() => {
     if (!message.read_by?.includes(user?.id) && user.id !== message.sender_id) {
-      console.log('updating read_by')
+      // console.log('updating read_by')
       updateDoc(
         doc(
           firestoreDB,
@@ -66,7 +66,7 @@ function ChatMessageText ({ message }) {
 }
 
 const handleImageLoad = () => {
-  console.log('image loaded')
+  // console.log('image loaded')
   const messageList = document.getElementById('messageContainer')
   messageList.scrollTo({
     behavior: 'smooth',
