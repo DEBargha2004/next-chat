@@ -67,7 +67,11 @@ const ParticipantsList = ({ list, Component, componentStyle }) => {
           <Component url={user.user_img} className={componentStyle} />
         ) : (
           <div className='w-11 mr-3' key={index}>
-            <Image src={user.user_img} className='w-10 rounded-full' alt='user-image' />
+            <Image
+              src={user.user_img}
+              className='w-10 rounded-full'
+              alt='user-image'
+            />
             <h1 className='text-xs truncate'>{user.user_name}</h1>
           </div>
         )
@@ -90,7 +94,14 @@ const SelectParticipants = ({ error, children, query, onChange, list }) => {
 export default function RootLayout ({ children }) {
   const chat = serviceList.find(service => service.service === 'chat')
 
-  const { groups, setSelectedGroup, selectedGroup,conversationsInfo,setGroups } = useContext(Appstate)
+  const {
+    groups,
+    setSelectedGroup,
+    selectedGroup,
+    conversationsInfo,
+    setGroups,
+    typingsInfo
+  } = useContext(Appstate)
   const { user } = useUser()
   let isProcessing = false
   const [processing, setProcessing] = useState(false)
@@ -297,13 +308,20 @@ export default function RootLayout ({ children }) {
     )
   }
 
-  useEffect(()=>{
-    for(const conversation_info of conversationsInfo){
-      if(conversation_info.type === 'group'){
-        updateGroups({conversation_info,setGroups})
+  const getUserInfo = id => {
+    const info = selectedGroup?.participants.find(
+      participant => participant.user_id === id
+    )
+    return info
+  }
+
+  useEffect(() => {
+    for (const conversation_info of conversationsInfo) {
+      if (conversation_info.type === 'group') {
+        updateGroups({ conversation_info, setGroups })
       }
     }
-  },[conversationsInfo])
+  }, [conversationsInfo])
 
   return (
     <>
@@ -336,6 +354,16 @@ export default function RootLayout ({ children }) {
                   OverlayComponent={GroupOverlayComponent}
                   include={{ lastMessage: true, lastMessageTime: true }}
                   id={group.id}
+                  essential={
+                    typingsInfo[selectedGroup?.conversation_id]?.typer
+                      ? `${
+                          getUserInfo(typingsInfo[selectedGroup?.conversation_id].typer)
+                            ?.user_name ||
+                          getUserInfo(typingsInfo[selectedGroup?.conversation_id].typer)
+                            ?.user_email
+                        } is typing...`
+                      : ``
+                  }
                 />
               </Link>
             )
