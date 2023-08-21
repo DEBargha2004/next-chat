@@ -9,6 +9,7 @@ import { uploadImage } from '@/functions/uploadImage'
 import Image from 'next/image'
 import generateUniqueId from '@/functions/generateUniqueid'
 import EmojiPicker from 'emoji-picker-react'
+import { throttleText } from '@/functions/throttle'
 
 function ChatInput ({ type, width }) {
   const { user } = useUser()
@@ -120,7 +121,7 @@ function ChatInput ({ type, width }) {
     }
 
     const sender_id = user.id
-    const receiver_id = selectedChatUser.user_id
+    const receiver_id = selectedChatUser.user_id || selectedGroup?.id
     const message_data = {
       text: userInput,
       image: imageInfo.info ? imageName : null
@@ -161,6 +162,15 @@ function ChatInput ({ type, width }) {
     await uploadImage(imageInfo.info, imageName)
     ;(userInput || imageInfo.info) &&
       (await shareMessage({ conversation_id, message }))
+  }
+
+  const handleChangeInChatInput = async e => {
+    setUserInput(e.target.value)
+    throttleText(
+      e.target.value,
+      selectedChatUser?.conversation_id || selectedGroup?.conversation_id,
+      user?.id
+    )
   }
 
   useEffect(() => {
@@ -239,8 +249,8 @@ function ChatInput ({ type, width }) {
           {emojiButtonStatus.clicked || emojiButtonStatus.hover ? (
             <div className='absolute bottom-8'>
               <EmojiPicker
-                onEmojiClick={e=> {
-                  setUserInput(prev => prev+e.emoji)
+                onEmojiClick={e => {
+                  setUserInput(prev => prev + e.emoji)
                 }}
               />
             </div>
@@ -253,7 +263,7 @@ function ChatInput ({ type, width }) {
           ref={userInputRef}
           id=''
           className='h-auto py-3 px-3 outline-none bg-gray-100 rounded-full text-lg text-slate-600 transition-all duration-500'
-          onChange={e => setUserInput(e.target.value)}
+          onChange={e => handleChangeInChatInput(e)}
           style={{ width: width ? width : `85%` }}
         />
         <button

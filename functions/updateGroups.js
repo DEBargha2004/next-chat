@@ -6,6 +6,7 @@ export async function updateGroups ({ conversation_info, setGroups }) {
   let group_info = await getDoc(
     doc(firestoreDB, `groups/group_${conversation_info.conversation_id}`)
   )
+  
   group_info = group_info.data()
   const local_storage_participants = []
 

@@ -2,9 +2,12 @@ import { useContext, useMemo } from 'react'
 import { Appstate } from '@/hooks/context'
 import Avatar from './Avatar'
 import { generateTimeStamp } from '../functions/generateTime'
+import { useUser } from '@clerk/nextjs'
 
 function ChatBoxHeader ({ address, name, participants, type, onClick }) {
-  const { selectedChatUser, presenceInfo, selectedGroup } = useContext(Appstate)
+  const { selectedChatUser, presenceInfo, selectedGroup, typingsInfo } =
+    useContext(Appstate)
+  const { user } = useUser()
 
   const user_presence_info = useMemo(() => {
     const current_user = presenceInfo.find(
@@ -27,12 +30,20 @@ function ChatBoxHeader ({ address, name, participants, type, onClick }) {
   return ifId_exist ? (
     <div className='w-full flex justify-between px-4 py-2 shadow-md shadow-[#00000017] truncate'>
       <div className='flex justify-between'>
-        <Avatar url={selectedChatUser?.user_img} address={address} className={`shrink-0`} />
+        <Avatar
+          url={selectedChatUser?.user_img}
+          address={address}
+          className={`shrink-0`}
+        />
         <div
           className='h-full flex flex-col items-start justify-center ml-4 cursor-pointer'
           onClick={onClick}
         >
-          <p>{name || selectedChatUser?.user_name || selectedChatUser?.user_email}</p>
+          <p>
+            {name ||
+              selectedChatUser?.user_name ||
+              selectedChatUser?.user_email}
+          </p>
           <p className={`text-slate-500 text-sm`}>
             {user_presence_info.online
               ? user_presence_info.online === 'away'
@@ -50,10 +61,11 @@ function ChatBoxHeader ({ address, name, participants, type, onClick }) {
                       !participant.left && `w-[60px]`
                     } truncate text-slate-600`}
                   >
-                    {!participant.left && (participant.user_name || participant.user_email)}
+                    {!participant.left &&
+                      (participant.user_name || participant.user_email)}
                     {}
                   </p>
-                ))}          
+                ))}
               </div>
             ) : null}
           </div>

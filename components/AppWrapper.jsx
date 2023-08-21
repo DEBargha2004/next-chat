@@ -1,13 +1,20 @@
 'use client'
 
 import { Appstate } from '@/hooks/context'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import { firestoreDB, realtimeDB } from '../firebase.config'
 import Sidenav from '@/components/Sidenav'
 import { serviceList } from '@/constants/serviceList'
-import { collection, query, onSnapshot, getDocs } from 'firebase/firestore'
+import {
+  collection,
+  query,
+  onSnapshot,
+  getDocs,
+  where,
+  doc
+} from 'firebase/firestore'
 
 import { updateFriends } from '@/functions/updateFriends'
 import { setUpSubCollectionListener } from '@/functions/subCollectionListener'
@@ -51,13 +58,6 @@ export default function AppWrapper ({ children }) {
   useEffect(() => {
     setFriends([])
     setGroups([])
-    // updateFriendsAndStatus({
-    //   conversationsInfo,
-    //   setFriends,
-    //   setPresenceInfo,
-    //   user,
-    //   setGroups
-    // });
 
     for (const conversation_info of conversationsInfo) {
       if (conversation_info.type === 'group') {
@@ -121,7 +121,14 @@ export default function AppWrapper ({ children }) {
         })
         unsub_subcollection_list.push(unsub_subcollection)
       }
+
+      const conversation_ids = []
+      conversations_info_list?.forEach(conversation_Info => {
+        conversation_ids.push(conversation_Info.conversation_id)
+      })
+
       setConversationsInfo(conversations_info_list)
+      console.log('setting...')
     })
 
     getFriends().then(result => {
@@ -134,6 +141,7 @@ export default function AppWrapper ({ children }) {
       unsub_subcollection_list?.forEach(unsub => unsub())
     }
   }, [isLoaded])
+
 
   // socket connection for managing presence status
   useEffect(() => {

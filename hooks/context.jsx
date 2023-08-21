@@ -2,6 +2,8 @@
 
 import { useUser } from '@clerk/nextjs'
 import { createContext, useEffect, useMemo, useRef, useState } from 'react'
+import { onSnapshot, doc } from 'firebase/firestore'
+import { firestoreDB } from '@/firebase.config'
 
 export const Appstate = createContext()
 
@@ -32,6 +34,7 @@ export function GlobalAppStateProvider ({ children }) {
   const [selectedComment, setSelectedComment] = useState(null)
   const [closeFriends, setCloseFriends] = useState([])
   const [closeFriendsInFriends, setCloseFriendsInFriends] = useState([])
+  const [typingsInfo, setTypingsInfo] = useState({})
 
   const lastPost = useRef(null)
   const lastFriend = useRef(null)
@@ -69,13 +72,36 @@ export function GlobalAppStateProvider ({ children }) {
   }, [referenceMessage])
 
   useEffect(() => {
+    conversationsInfo?.forEach(conversationInfo => {
+      console.log(conversationsInfo)
+      onSnapshot(
+        doc(firestoreDB, `conversations/${conversationInfo.conversation_id}`),
+        snapshot => {
+          if (snapshot.exists()) {
+            setTypingsInfo(prev => ({
+              ...prev,
+              [conversationInfo.conversation_id]: snapshot.get('typing')
+            }))
+          }
+        }
+      )
+    })
+
+    console.log('typing info')
+    console.log(typingsInfo)
+
+  }, [conversationsInfo])
+
+  useEffect(() => {
     setSelectedChatUser(prev => ({
       ...prev,
       user_name: '',
       user_img: '',
       last_Seen: '',
       online: false,
-      user_id: null
+      user_id: null,
+      user_email: '',
+      conversation_id: ''
     }))
     setSelectedGroup({})
   }, [selectedService])
@@ -121,7 +147,8 @@ export function GlobalAppStateProvider ({ children }) {
         setCloseFriends,
         lastFriend,
         closeFriendsInFriends,
-        setCloseFriendsInFriends
+        setCloseFriendsInFriends,
+        typingsInfo
       }}
     >
       {children}

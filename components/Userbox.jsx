@@ -26,7 +26,8 @@ function Userbox ({
   address,
   badges,
   id,
-  enableMoreInfo
+  enableMoreInfo,
+  essential
 }) {
   const { user } = useUser()
   const { presenceInfo, messages, selectedGroup } = useContext(Appstate)
@@ -105,6 +106,7 @@ function Userbox ({
               message={lastMessage}
               unread={unreadMessages}
               lastMessage={lastMessage}
+              essential = {essential}
             />
           ) : null}
         </div>
