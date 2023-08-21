@@ -107,7 +107,8 @@ function Page ({ params }) {
       const conversation_info = {
         conversation_id: selectedGroup?.conversation_id,
         createdAt: selectedGroup?.createdAt,
-        type: 'group'
+        type: 'group',
+        joinedAt : serverTimestamp()
       }
       for (const id of selectedUsersId) {
         await setDoc(
@@ -121,7 +122,8 @@ function Page ({ params }) {
         await setDoc(
           doc(firestoreDB, `groups/${selectedGroup?.id}/participants/${id}`),
           {
-            ...userInfo
+            ...userInfo,
+            joinedAt : serverTimestamp()
           }
         )
         await updateDoc(doc(firestoreDB, `groups/${selectedGroup?.id}`), {

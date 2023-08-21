@@ -7,7 +7,7 @@ import { serviceList } from '@/constants/serviceList'
 export const sidenavProvider = createContext()
 
 function Sidenav ({ className }) {
-  const { selectedService, messages } = useContext(Appstate)
+  const { selectedService, messages,conversationsInfo } = useContext(Appstate)
   const { user } = useUser()
 
   const unreadUsermessage = useMemo(() => {
@@ -29,7 +29,7 @@ function Sidenav ({ className }) {
     })
 
     return count
-  }, [messages, user])
+  }, [messages, user, conversationsInfo])
 
   const unreadGroupmessage = useMemo(() => {
     let count = 0
@@ -50,7 +50,7 @@ function Sidenav ({ className }) {
     })
 
     return count
-  }, [messages, user])
+  }, [messages, user, conversationsInfo])
 
   return (
     <nav
@@ -58,7 +58,9 @@ function Sidenav ({ className }) {
     >
       <div className='w-full h-[70%] flex flex-col justify-between items-center'>
         <div className='relative flex flex-col items-center justify-between w-full h-[60%]'>
-          <sidenavProvider.Provider value={{ unreadUsermessage,unreadGroupmessage }}>
+          <sidenavProvider.Provider
+            value={{ unreadUsermessage, unreadGroupmessage }}
+          >
             {serviceList.map((service, index) => (
               <ServiceComponent
                 url={service.url}

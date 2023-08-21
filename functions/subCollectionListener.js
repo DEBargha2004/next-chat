@@ -1,5 +1,4 @@
 import { firestoreDB } from '@/firebase.config'
-import { info } from 'autoprefixer'
 import {
   query,
   collection,
@@ -10,7 +9,8 @@ import {
   onSnapshot,
   arrayUnion,
   where,
-  getDocs
+  getDocs,
+  startAfter
 } from 'firebase/firestore'
 
 export const setUpSubCollectionListener = async ({
@@ -19,13 +19,26 @@ export const setUpSubCollectionListener = async ({
   setMessages,
   setGroups
 }) => {
-  const mquery = query(
-    collection(
-      firestoreDB,
-      `conversations/${conversation_info.conversation_id}/messages`
-    ),
-    orderBy('message_createdAt')
-  )
+  let mquery
+
+  if (conversation_info.joinedAt) {
+    mquery = query(
+      collection(
+        firestoreDB,
+        `conversations/${conversation_info.conversation_id}/messages`
+      ),
+      orderBy('message_createdAt'),
+      startAfter(conversation_info.joinedAt)
+    )
+  } else {
+    mquery = query(
+      collection(
+        firestoreDB,
+        `conversations/${conversation_info.conversation_id}/messages`
+      ),
+      orderBy('message_createdAt')
+    )
+  }
 
   const unsub = onSnapshot(mquery, async snapshots => {
     const messages = []

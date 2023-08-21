@@ -191,14 +191,15 @@ export default function RootLayout ({ children }) {
         const conversation_info = {
           conversation_id: conversation_id,
           createdAt: timeStamp,
-          type: 'group'
+          type: 'group',
         }
 
-        await setDoc(
+        await setDoc(                                                 //adding group_info
           doc(firestoreDB, `groups/group_${conversation_id}`),
           groupInfo_firebase
         )
-        await Promise.all(
+
+        await Promise.all(                                            //adding participants to group
           participants.map(async participant => {
             setDoc(
               doc(
@@ -206,7 +207,8 @@ export default function RootLayout ({ children }) {
                 `groups/group_${conversation_id}/participants/${participant.user_id}`
               ),
               {
-                ...participant
+                ...participant,
+                joinedAt : serverTimestamp()
               }
             )
           })
@@ -216,23 +218,25 @@ export default function RootLayout ({ children }) {
           doc(firestoreDB, `conversations/${conversation_id}`),
           conversation_info
         )
-        await Promise.all(
+
+        await Promise.all(                                            //adding participants in conversations
           participants.map(async participant => {
             const path = `conversations/${conversation_id}/participants/${participant.user_id}`
             setDoc(doc(firestoreDB, path), {
-              participant_id: participant.user_id
+              participant_id: participant.user_id,
+              joinedAt : serverTimestamp()
             })
           })
         )
 
-        await Promise.all(
+        await Promise.all(                                            //adding conversation_info in user->conversations
           participants.map(async participant => {
             await setDoc(
               doc(
                 firestoreDB,
                 `users/${participant.user_id}/conversations/${conversation_id}`
               ),
-              conversation_info
+              {...conversation_info,joinedAt : serverTimestamp()}
             )
           })
         )
@@ -308,10 +312,8 @@ export default function RootLayout ({ children }) {
     )
   }
 
-  const getUserInfo = id => {
-    const info = selectedGroup?.participants.find(
-      participant => participant.user_id === id
-    )
+  const getUserInfo = (id, participants) => {
+    const info = participants?.find(participant => participant.user_id === id)
     return info
   }
 
@@ -355,13 +357,19 @@ export default function RootLayout ({ children }) {
                   include={{ lastMessage: true, lastMessageTime: true }}
                   id={group.id}
                   essential={
-                    typingsInfo[selectedGroup?.conversation_id]?.typer
-                      ? `${
-                          getUserInfo(typingsInfo[selectedGroup?.conversation_id].typer)
-                            ?.user_name ||
-                          getUserInfo(typingsInfo[selectedGroup?.conversation_id].typer)
-                            ?.user_email
-                        } is typing...`
+                    typingsInfo[group?.conversation_id]?.typer
+                      ? typingsInfo[group?.conversation_id]?.typer !== user?.id
+                        ? `${
+                            getUserInfo(
+                              typingsInfo[group?.conversation_id].typer,
+                              group.participants
+                            )?.user_name ||
+                            getUserInfo(
+                              typingsInfo[group?.conversation_id].typer,
+                              group.participants
+                            )?.user_email
+                          } is typing...`
+                        : ``
                       : ``
                   }
                 />
