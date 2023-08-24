@@ -4,8 +4,8 @@ import { doc, getDoc } from 'firebase/firestore'
 import { NextResponse } from 'next/server'
 
 const searchClient = algoliasearch(
-  'HN1VZMZZ3E',
-  '5df6540e69ba1d14f71b16baf0fb548d'
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
+  process.env.NEXT_PUBLIC_ALGOLIA_API_KEY
 )
 
 const algoliaIndex = searchClient.initIndex('users')
