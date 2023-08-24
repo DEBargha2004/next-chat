@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs'
 import { createContext, useEffect, useMemo, useRef, useState } from 'react'
 import { onSnapshot, doc } from 'firebase/firestore'
 import { firestoreDB } from '@/firebase.config'
+import { isBoolean } from 'lodash'
 
 export const Appstate = createContext()
 
@@ -38,6 +39,7 @@ export function GlobalAppStateProvider ({ children }) {
 
   const lastPost = useRef(null)
   const lastFriend = useRef(null)
+  const lastGroupsConversationIds = useRef([])
 
   const refMessageInfo = useMemo(() => {
     const sender_id = referenceMessage?.sender_id
@@ -73,7 +75,7 @@ export function GlobalAppStateProvider ({ children }) {
 
   useEffect(() => {
     conversationsInfo?.forEach(conversationInfo => {
-      console.log(conversationsInfo)
+      // console.log(conversationsInfo)
       onSnapshot(
         doc(firestoreDB, `conversations/${conversationInfo.conversation_id}`),
         snapshot => {
@@ -87,10 +89,9 @@ export function GlobalAppStateProvider ({ children }) {
       )
     })
 
-    console.log('typing info')
-    console.log(typingsInfo)
 
   }, [conversationsInfo])
+
 
   useEffect(() => {
     setSelectedChatUser(prev => ({
@@ -148,7 +149,8 @@ export function GlobalAppStateProvider ({ children }) {
         lastFriend,
         closeFriendsInFriends,
         setCloseFriendsInFriends,
-        typingsInfo
+        typingsInfo,
+        lastGroupsConversationIds
       }}
     >
       {children}

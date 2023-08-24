@@ -90,7 +90,7 @@ function FriendList ({ UserboxComponent }) {
             <UserboxComponent
               item={item}
               include={{ lastMessage: true, lastMessageTime: true }}
-              onClick={() => selectUser({ setSelectedChatUser, item: item })}
+              onClick={() => setSelectedChatUser(item)}
               selected={selectedChatUser.user_id === item.user_id}
               OverlayComponent={OverlayComponent}
               id={item.user_id}

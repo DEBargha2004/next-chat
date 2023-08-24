@@ -96,10 +96,10 @@ function ChatBoxHeader ({ address, name, participants, type, onClick }) {
                       <p
                         key={participant.user_id}
                         className={`text-xs shrink-0 ${
-                          !participant.left && `w-[60px]`
+                          participant.isParticipant && `w-[60px]`
                         } truncate text-slate-600`}
                       >
-                        {!participant.left &&
+                        {participant.isParticipant &&
                           (participant.user_name || participant.user_email)}
                         {}
                       </p>

@@ -1,4 +1,4 @@
-import { firestoreDB } from '@/firebase.config'
+import { firestoreDB } from "@/firebase.config";
 import {
   query,
   collection,
@@ -10,41 +10,51 @@ import {
   arrayUnion,
   where,
   getDocs,
-  startAfter
-} from 'firebase/firestore'
+  startAfter,
+} from "firebase/firestore";
 
 export const setUpSubCollectionListener = async ({
   conversation_info,
   user,
   setMessages,
-  setGroups
 }) => {
-  let mquery
-
-  if (conversation_info.joinedAt) {
-    mquery = query(
-      collection(
-        firestoreDB,
-        `conversations/${conversation_info.conversation_id}/messages`
-      ),
-      orderBy('message_createdAt'),
-      startAfter(conversation_info.joinedAt)
-    )
+  let mquery;
+  if (conversation_info.isParticipant) {
+    if (conversation_info.joinedAt) {
+      mquery = query(
+        collection(
+          firestoreDB,
+          `conversations/${conversation_info.conversation_id}/messages`
+        ),
+        orderBy("message_createdAt"),
+        startAfter(conversation_info.joinedAt)
+      );
+    } else {
+      mquery = query(
+        collection(
+          firestoreDB,
+          `conversations/${conversation_info.conversation_id}/messages`
+        ),
+        orderBy("message_createdAt")
+      );
+    }
   } else {
+    console.log(conversation_info);
     mquery = query(
       collection(
         firestoreDB,
         `conversations/${conversation_info.conversation_id}/messages`
       ),
-      orderBy('message_createdAt')
-    )
+      where("createdAt", "<", conversation_info.leftAt || null),
+      orderBy("createdAt")
+    );
   }
 
-  const unsub = onSnapshot(mquery, async snapshots => {
-    const messages = []
+  const unsub = onSnapshot(mquery, async (snapshots) => {
+    const messages = [];
 
     await Promise.all(
-      snapshots.docs.map(async snapshot => {
+      snapshots.docs.map(async (snapshot) => {
         // dealing with subcollection
         // its necessary to add docs
         if (
@@ -62,29 +72,29 @@ export const setUpSubCollectionListener = async ({
             {
               message_deliver: true,
               message_deliveredAt: serverTimestamp(),
-              delivered_to: arrayUnion(user.id)
+              delivered_to: arrayUnion(user.id),
             }
-          )
+          );
         }
-        messages.push(snapshot.data())
+        messages.push(snapshot.data());
       })
-    )
-    let group_id
-    if (conversation_info.type === 'group') {
-      group_id = `group_${conversation_info.conversation_id}`
+    );
+    let group_id;
+    if (conversation_info.type === "group") {
+      group_id = `group_${conversation_info.conversation_id}`;
     }
 
     let friend_id = conversation_info.participants?.find(
-      participant_id => participant_id !== user.id
-    )
+      (participant_id) => participant_id !== user.id
+    );
 
-    setMessages(prev => {
+    setMessages((prev) => {
       return {
         ...prev,
-        [group_id || friend_id]: messages
-      }
-    })
-  })
+        [group_id || friend_id]: messages,
+      };
+    });
+  });
 
-  return unsub
-}
+  return unsub;
+};

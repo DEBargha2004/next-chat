@@ -23,6 +23,7 @@ export async function updateFriends ({
 
   friend_info.conversation_id = conversation_info.conversation_id
   friend_info.typing = conversation_info.typing
+  friend_info.isParticipant = conversation_info.isParticipant
 
   console.log(friend_info.typing);
   // friends_info.push(friend_info)

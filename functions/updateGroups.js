@@ -18,9 +18,13 @@ export async function updateGroups ({ conversation_info, setGroups }) {
   })
   
   group_info.participants = local_storage_participants
+  group_info.isParticipant = conversation_info.isParticipant
+
+  console.log(group_info);
 
   setGroups(prev => {
     const cache_groups = cloneDeep(prev)
+    console.log(prev);
     const index = _.findIndex(
       cache_groups,
       group => group.conversation_id === conversation_info.conversation_id
