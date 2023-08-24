@@ -41,6 +41,7 @@ function Page({ params }) {
     setSelectedService,
     setFriends,
     setPresenceInfo,
+    conversationsInfo,
   } = useContext(Appstate);
 
   const router = useRouter();
@@ -52,7 +53,9 @@ function Page({ params }) {
   const [selectedUsersId, setSelectedUsersId] = useState([]);
   const [searchedFriend, setSearchedFriend] = useState([]);
   const [noResponse, setNoResponse] = useState(false);
-  const { user } = useUser();
+  const [isEligible, setIsEligible] = useState(false);
+
+  const { user, isLoaded } = useUser();
   const addFriendDialogBoxRef = useRef(null);
 
   const handleSelectedUsers = (userId) => {
@@ -183,6 +186,20 @@ function Page({ params }) {
     });
   }, [selectedGroup]);
 
+  useEffect(() => {
+    if (!isLoaded) return;
+    selectedGroup.conversation_id &&
+      getDoc(
+        doc(
+          firestoreDB,
+          `conversations/${selectedGroup.conversation_id}/participants/${user?.id}`
+        )
+      ).then((data) => {
+        const isParticipant = data.get("isParticipant");
+        setIsEligible(isParticipant);
+      });
+  }, [conversationsInfo[selectedGroup?.conversation_id], user, isLoaded,selectedGroup]);
+
   return (
     <>
       {showChatPage ? (
@@ -202,12 +219,12 @@ function Page({ params }) {
               list={messages[selectedGroup?.id]}
               database={selectedGroup?.participants}
             />
-            {selectedGroup?.isParticipant ? (
+            {isEligible ? (
               <ChatInput type="group" width={rightSidebar ? `80%` : ``} />
             ) : (
               <div
                 className="h-[64px] flex justify-center items-center  bg-orange-200 text-black"
-                width={rightSidebar ? `80%` : ``}
+                // width={rightSidebar ? `80%` : ``}
               >
                 You are no longer a participant
               </div>
@@ -256,7 +273,6 @@ function Page({ params }) {
                   {selectedGroup?.participantsCount} participants
                 </div>
                 <div className="pb-4">
-                  {console.log('selected group is ',selectedGroup)}
                   {selectedGroup?.participants?.map((participant) => {
                     const linkRef = participant.user_id.replace("user_", "");
                     return participant.isParticipant ? (
