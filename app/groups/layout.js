@@ -335,11 +335,6 @@ export default function RootLayout ({ children }) {
         >
           Create New Group
         </div>
-        {/* <Searchbar
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={`Search for a group`}
-        /> */}
         <div>
           {groups.map(group => {
             return (
