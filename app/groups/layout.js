@@ -19,6 +19,7 @@ import { Appstate } from "@/hooks/context";
 import Link from "next/link";
 import Image from "next/image";
 import { updateGroups } from "@/functions/updateGroups";
+import { useRouter } from "next/navigation";
 
 const GroupInfo = ({ groupInfo, setGroupInfo, list }) => {
   const handleGroupImage = (e) => {
@@ -101,11 +102,13 @@ export default function RootLayout({ children }) {
     conversationsInfo,
     setGroups,
     typingsInfo,
-    lastGroupsConversationIds,
+    lastGroupsConversations,
+    unsub_subcollection_list,
   } = useContext(Appstate);
   const { user } = useUser();
   let isProcessing = false;
   const [processing, setProcessing] = useState(false);
+  const router = useRouter()
 
   const [query, setQuery] = useState("");
   const [users_result, setUsers_result] = useState([]);
@@ -332,38 +335,48 @@ export default function RootLayout({ children }) {
   };
 
   useEffect(() => {
+    // console.log(conversationsInfo);
     for (const conversation_info of conversationsInfo) {
       if (conversation_info.type === "group") {
-        if (
-          !lastGroupsConversationIds.current?.includes(
-            conversation_info.conversation_id
-          )
-        ) {
-          updateGroups({ conversation_info, setGroups });
-          console.log("groups fetched");
-          lastGroupsConversationIds.current.push(
-            conversation_info.conversation_id
-          );
-        }
-      }
-    }
-
-    for (const lastGroupConversationId of lastGroupsConversationIds.current) {
-      const ifGroupExists = conversationsInfo.find(
-        (conversationInfo) =>
-          conversationInfo.conversation_id === lastGroupConversationId
-      );
-
-      if (!ifGroupExists) {
-        console.log("group removed");
-        setGroups((prev) => {
-          prev = cloneDeep(prev);
-          const groupIndex = prev.findIndex(
-            (group) => group.conversation_id === lastGroupConversationId
-          );
-          prev.splice(groupIndex, 1);
-          return prev;
+        // const prev_conversation_info = lastGroupsConversations.current.find(
+        //   (conversation) =>
+        //     conversation.conversation_id === conversation_info.conversation_id
+        // );
+        // router.refresh()
+        // location.reload()
+        updateGroups({ conversation_info, setGroups, setSelectedGroup });
+        // console.log("groups fetched");
+        lastGroupsConversations.current.push({
+          conversation_id: conversation_info.conversation_id,
+          isParticipant: conversation_info.isParticipant,
         });
+        // if (prev_conversation_info) {
+        //   // console.log(prev_conversation_info,conversation_info);
+        //   if (
+        //     prev_conversation_info.isParticipant !==
+        //     conversation_info.isParticipant
+        //   ) {
+        //     console.log(prev_conversation_info, conversation_info);
+        //     const unsub = unsub_subcollection_list.find(
+        //       (unsub_conversation) =>
+        //         unsub_conversation.conversation_id ===
+        //         conversation_info.conversation_id
+        //     );
+
+        //     updateGroups({ conversation_info, setGroups, setSelectedGroup });
+        //     // console.log("groups fetched");
+        //     lastGroupsConversations.current.push({
+        //       conversation_id: conversation_info.conversation_id,
+        //       isParticipant: conversation_info.isParticipant,
+        //     });
+        //   }
+        // } else {
+        //   updateGroups({ conversation_info, setGroups, setSelectedGroup });
+        //   lastGroupsConversations.current.push({
+        //     conversation_id: conversation_info.conversation_id,
+        //     isParticipant: conversation_info.isParticipant,
+        //   });
+        // }
       }
     }
   }, [conversationsInfo]);

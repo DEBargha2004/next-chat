@@ -39,14 +39,15 @@ export const setUpSubCollectionListener = async ({
       );
     }
   } else {
-    console.log(conversation_info);
+    console.log(conversation_info); 
     mquery = query(
       collection(
         firestoreDB,
         `conversations/${conversation_info.conversation_id}/messages`
       ),
-      where("createdAt", "<", conversation_info.leftAt || null),
-      orderBy("createdAt")
+      where("message_createdAt","<",conversation_info.leftAt),
+      where("message_createdAt",">",conversation_info.joinedAt),
+      orderBy("message_createdAt"),
     );
   }
 

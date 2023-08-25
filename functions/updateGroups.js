@@ -1,39 +1,51 @@
-import { getDoc, doc, getDocs, collection } from 'firebase/firestore'
-import { firestoreDB } from '@/firebase.config'
-import _, { cloneDeep } from 'lodash'
+import { getDoc, doc, getDocs, collection } from "firebase/firestore";
+import { firestoreDB } from "@/firebase.config";
+import _, { cloneDeep } from "lodash";
 
-export async function updateGroups ({ conversation_info, setGroups }) {
+export async function updateGroups({
+  conversation_info,
+  setGroups,
+  setSelectedGroup,
+}) {
   let group_info = await getDoc(
     doc(firestoreDB, `groups/group_${conversation_info.conversation_id}`)
-  )
-  
-  group_info = group_info.data()
-  const local_storage_participants = []
+  );
+
+  group_info = group_info.data();
+  const local_storage_participants = [];
 
   const participants = await getDocs(
     collection(firestoreDB, `groups/${group_info.id}/participants`)
-  )
-  participants.docs?.forEach(participant => {
-    local_storage_participants.push(participant.data())
-  })
-  
-  group_info.participants = local_storage_participants
-  group_info.isParticipant = conversation_info.isParticipant
+  );
+  participants.docs?.forEach((participant) => {
+    local_storage_participants.push(participant.data());
+  });
 
-  console.log(group_info);
+  group_info.participants = local_storage_participants;
+  group_info.isParticipant = conversation_info.isParticipant;
 
-  setGroups(prev => {
-    const cache_groups = cloneDeep(prev)
-    console.log(prev);
+  setGroups((prev) => {
+    const cache_groups = cloneDeep(prev);
     const index = _.findIndex(
       cache_groups,
-      group => group.conversation_id === conversation_info.conversation_id
-    )
+      (group) => group.conversation_id === conversation_info.conversation_id
+    );
     if (index === -1) {
-      cache_groups.push(group_info)
+      cache_groups.push(group_info);
     } else {
-      cache_groups.splice(index, 1, group_info)
+      cache_groups.splice(index, 1, group_info);
     }
-    return cache_groups
-  })
+    return cache_groups;
+  });
+
+  setSelectedGroup((prev) => {
+    if (prev?.id === group_info.id) {
+      console.log(group_info);
+      return group_info;
+    } else {
+      console.log('not updated in selectedgroup');
+      return prev;
+    }
+  });
+  return group_info;
 }

@@ -38,6 +38,7 @@ export default function AppWrapper({ children }) {
     setSelectedService,
     setGroups,
     setCloseFriends,
+    unsub_subcollection_list,
   } = useContext(Appstate);
 
   const [connection, setConnection] = useState(false);
@@ -99,7 +100,7 @@ export default function AppWrapper({ children }) {
 
     // setFriends([])
     // setGroups([])
-    const unsub_subcollection_list = [];
+
     setPresenceInfo([]);
 
     const cquery = query(
@@ -119,7 +120,10 @@ export default function AppWrapper({ children }) {
           user,
           setMessages,
         });
-        unsub_subcollection_list.push(unsub_subcollection);
+        unsub_subcollection_list.push({
+          conversation_id: conversation_info.conversation_id,
+          unsub: unsub_subcollection,
+        });
       }
 
       const conversation_ids = [];
@@ -134,12 +138,6 @@ export default function AppWrapper({ children }) {
     getFriends().then((result) => {
       setCloseFriends(result);
     });
-
-    return () => {
-      // unsub()
-      unSubMessages();
-      unsub_subcollection_list?.forEach((unsub) => unsub());
-    };
   }, [isLoaded]);
 
   // socket connection for managing presence status
@@ -174,7 +172,6 @@ export default function AppWrapper({ children }) {
       }
     });
   }, []);
-
 
   return (
     <div className="h-full">
